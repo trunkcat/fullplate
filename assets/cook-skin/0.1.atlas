@@ -1,0 +1,70 @@
+
+0.1.png
+size: 512, 512
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+pally-medium
+  rotate: false
+  xy: 1, 243
+  size: 504, 57
+  orig: 504, 57
+  offset: 0, 0
+  index: -1
+pally-medium-24
+  rotate: false
+  xy: 1, 404
+  size: 506, 101
+  orig: 506, 101
+  offset: 0, 0
+  index: -1
+pally-regular-16
+  rotate: false
+  xy: 1, 182
+  size: 504, 59
+  orig: 504, 59
+  offset: 0, 0
+  index: -1
+pally-regular-24
+  rotate: false
+  xy: 1, 302
+  size: 506, 100
+  orig: 506, 100
+  offset: 0, 0
+  index: -1
+button-disabled
+  rotate: false
+  xy: 1, 116
+  size: 214, 64
+  split: 4, 4, 4, 14
+  pad: 24, 24, 10, 20
+  orig: 214, 64
+  offset: 0, 0
+  index: -1
+button-down
+  rotate: false
+  xy: 217, 50
+  size: 214, 64
+  split: 4, 4, 11, 7
+  pad: 24, 24, 17, 13
+  orig: 214, 64
+  offset: 0, 0
+  index: -1
+button-over
+  rotate: false
+  xy: 217, 116
+  size: 214, 64
+  split: 4, 4, 4, 14
+  pad: 24, 24, 10, 20
+  orig: 214, 64
+  offset: 0, 0
+  index: -1
+button-up
+  rotate: false
+  xy: 1, 50
+  size: 214, 64
+  split: 4, 4, 4, 14
+  pad: 24, 24, 10, 20
+  orig: 214, 64
+  offset: 0, 0
+  index: -1

@@ -2,7 +2,9 @@ package io.trunkcat.fullplate.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
 import io.trunkcat.fullplate.CookGame;
 
@@ -31,6 +33,15 @@ public class Screen implements com.badlogic.gdx.Screen {
     @Override
     public void resize(int width, int height) {
         game.viewport.update(width, height, true);
+    }
+
+    public static void onChange(Actor actor, Runnable runnable) {
+        actor.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                runnable.run();
+            }
+        });
     }
 
     @Override

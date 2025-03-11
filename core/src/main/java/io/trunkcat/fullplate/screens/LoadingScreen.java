@@ -7,13 +7,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
-import java.util.HashMap;
-
 import io.trunkcat.fullplate.CookGame;
 import io.trunkcat.fullplate.models.PlayerData;
-import io.trunkcat.fullplate.models.responses.SignInData;
 import io.trunkcat.fullplate.network.ApiResponse;
-import io.trunkcat.fullplate.network.URL;
 
 public class LoadingScreen extends Screen {
     public LoadingScreen(CookGame game) {
@@ -34,7 +30,7 @@ public class LoadingScreen extends Screen {
 
         table.add(loadStatusLabel);
 
-        game.httpClient.GET("/api/player", new Net.HttpResponseListener() {
+        game.httpClient.get("/api/player", new Net.HttpResponseListener() {
             @Override
             public void handleHttpResponse(Net.HttpResponse httpResponse) {
                 final String result = httpResponse.getResultAsString();

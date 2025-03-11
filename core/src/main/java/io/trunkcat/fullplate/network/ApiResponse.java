@@ -51,18 +51,13 @@ public class ApiResponse<T> {
         json.setUsePrototypes(false);
 
         JsonValue jsonValue = new JsonReader().parse(jsonString);
-
         ApiResponse<T> response = new ApiResponse<>();
 
         JsonValue okValue = jsonValue.get("ok");
-        if (okValue != null) {
-            response.setOk(okValue.asBoolean());
-        }
+        if (okValue != null) response.setOk(okValue.asBoolean());
 
         JsonValue messageValue = jsonValue.get("message");
-        if (messageValue != null) {
-            response.setMessage(messageValue.asString());
-        }
+        if (messageValue != null) response.setMessage(messageValue.asString());
 
         JsonValue dataValue = jsonValue.get("data");
         if (dataValue != null) {

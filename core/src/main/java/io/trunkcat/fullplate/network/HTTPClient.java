@@ -41,9 +41,8 @@ public class HTTPClient {
         });
     }
 
-    public HTTPClient(String basePath, String authSessionToken) {
-        this(basePath);
-        this.authSessionToken = authSessionToken;
+    public boolean hasAuthSessionToken() {
+        return authSessionToken != null && !authSessionToken.isEmpty();
     }
 
     public void setAuthSessionToken(String token) {
@@ -68,12 +67,12 @@ public class HTTPClient {
         return request;
     }
 
-    public void GET(String path, Net.HttpResponseListener httpResponseListener) {
+    public void get(String path, Net.HttpResponseListener httpResponseListener) {
         HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.GET, path);
         request(request.build(), httpResponseListener);
     }
 
-    public void POST(String path, Object json, Net.HttpResponseListener httpResponseListener) {
+    public void post(String path, Object json, Net.HttpResponseListener httpResponseListener) {
         HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.POST, path);
         Net.HttpRequest req = request.build();
         req.setHeader("Content-Type", "application/json");
