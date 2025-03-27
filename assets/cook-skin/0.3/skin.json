@@ -1,0 +1,152 @@
+{
+com.badlogic.gdx.graphics.g2d.BitmapFont: {
+	pally-bold-28: {
+		file: pally-bold-28.fnt
+		scaledSize: -1
+		markupEnabled: false
+		flip: false
+	}
+	pally-bold-36: {
+		file: pally-bold-36.fnt
+		scaledSize: -1
+		markupEnabled: false
+		flip: false
+	}
+	pally-bold-44: {
+		file: pally-bold-44.fnt
+		scaledSize: -1
+		markupEnabled: false
+		flip: false
+	}
+	pally-medium-16: {
+		file: pally-medium.fnt
+		scaledSize: -1
+		markupEnabled: false
+		flip: false
+	}
+	pally-medium-24: {
+		file: pally-medium-24.fnt
+		scaledSize: -1
+		markupEnabled: false
+		flip: false
+	}
+	pally-medium-32: {
+		file: Pally-Medium.fnt
+		scaledSize: -1
+		markupEnabled: false
+		flip: false
+	}
+	pally-regular-16: {
+		file: pally-regular-16.fnt
+		scaledSize: -1
+		markupEnabled: false
+		flip: false
+	}
+	pally-regular-24: {
+		file: pally-regular-24.fnt
+		scaledSize: -1
+		markupEnabled: false
+		flip: false
+	}
+	pally-regular-28: {
+		file: pally-regular-28.fnt
+		scaledSize: -1
+		markupEnabled: false
+		flip: false
+	}
+	silver-24: {
+		file: silver.fnt
+		scaledSize: -1
+		markupEnabled: false
+		flip: false
+	}
+}
+com.badlogic.gdx.graphics.Color: {
+	button-disabled: {
+		hex: 535f6aff
+	}
+	button-primary: {
+		hex: 000000ff
+	}
+	RGBA_101_89_64_255: {
+		hex: 655940ff
+	}
+	white: {
+		hex: ffffffff
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
+	settings-button: {
+		up: settings-btn-up
+		down: settings-btn-down
+	}
+	notifications-button: {
+		up: notification-btn-up
+		down: notification-btn-down
+	}
+	leaderboard-button: {
+		up: trophy-btn-up
+		down: trophy-btn-down
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
+	default: {
+		font: pally-regular-28
+		fontColor: button-primary
+	}
+	player-level: {
+		font: pally-bold-28
+		fontColor: RGBA_101_89_64_255
+		background: rect-player-level-bg
+	}
+	font-16: {
+		font: pally-regular-16
+		fontColor: button-primary
+	}
+	h2: {
+		font: pally-bold-36
+		fontColor: RGBA_101_89_64_255
+	}
+	h1: {
+		font: pally-bold-44
+		fontColor: RGBA_101_89_64_255
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
+	default: {
+		font: pally-medium-32
+		fontColor: RGBA_101_89_64_255
+		disabledFontColor: RGBA_101_89_64_255
+		up: textbutton-up
+		down: textbutton-down
+		disabled: textbutton-disabled
+	}
+	legacy-buttons: {
+		font: pally-regular-24
+		fontColor: button-primary
+		disabledFontColor: button-disabled
+		up: button-up
+		down: button-down
+		over: button-over
+		disabled: button-disabled
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.TextTooltip$TextTooltipStyle: {
+	default: {
+		label: default
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
+	default: {
+		background: window-rect
+		titleFont: pally-medium-16
+		titleFontColor: button-primary
+		stageBackground: window-stage-background
+	}
+	legacy: {
+		background: rect3
+		titleFont: pally-medium-16
+		titleFontColor: button-primary
+	}
+}
+}

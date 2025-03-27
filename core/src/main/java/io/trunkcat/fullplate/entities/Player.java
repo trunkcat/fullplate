@@ -20,26 +20,27 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.network;
+package io.trunkcat.fullplate.entities;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import io.trunkcat.fullplate.CookGame;
+import io.trunkcat.fullplate.models.PlayerData;
+import io.trunkcat.fullplate.screens.LoginScreen;
+import io.trunkcat.fullplate.utilities.Constants;
 
-public class URL {
-    static public String create(String path) {
-        return path;
+public class Player {
+    private final CookGame game;
+    public PlayerData data;
+
+    public Player() {
+        game = CookGame.getInstance();
+        data = new PlayerData();
     }
 
-    static public String create(String path, HashMap<String, String> searchParams) {
-        if (searchParams != null && !searchParams.isEmpty()) {
-            ArrayList<String> search = new ArrayList<>();
-            for (Map.Entry<String, String> entry : searchParams.entrySet()) {
-                search.add(entry.getKey() + "=" + entry.getValue());
-            }
-            String searchString = "?" + String.join("&", search);
-            path += searchString;
-        }
-        return path;
+    public void logout() {
+        game.httpClient.setAuthSessionToken(null);
+        data = null;
+        game.preferences.remove(Constants.PREF_KEY_SESSION_TOKEN);
+        game.preferences.flush();
+        game.setScreen(new LoginScreen());
     }
 }
