@@ -49,10 +49,10 @@ public class CookGame extends Game {
     public void create() {
         viewport = new ScreenViewport();
         PallyFont = new GameFont("fonts/Pally-Regular.otf");
-        httpClient = new HTTPClient("http://192.168.29.36:8080/api");
+        httpClient = new HTTPClient("http://192.168.1.8:8080/api");
         player = new Player();
         preferences = Gdx.app.getPreferences("Full plate Preferences");
-        skin = new Skin(Gdx.files.internal("cook-skin/0.3/skin.json"));
+        skin = new Skin(Gdx.files.internal("cook-skin/0.5/skin.json"));
 
         String sessionToken = preferences.getString(Constants.PREF_KEY_SESSION_TOKEN);
         if (sessionToken != null && !sessionToken.isEmpty()) {
