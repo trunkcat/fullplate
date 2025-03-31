@@ -88,6 +88,14 @@ com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
 		up: trophy-btn-up
 		down: trophy-btn-down
 	}
+	place-play-button: {
+		up: place-play-btn-up
+		down: place-play-btn-down
+	}
+	place-lock-button: {
+		up: place-lock-btn-up
+		down: place-lock-btn-down
+	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	default: {

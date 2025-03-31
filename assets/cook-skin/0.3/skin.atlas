@@ -91,7 +91,7 @@ button-up
   index: -1
 rect-bottom
   rotate: false
-  xy: 217, 22
+  xy: 509, 359
   size: 32, 32
   split: 0, 0, 9, 0
   pad: 2, 2, 9, 2
@@ -100,7 +100,7 @@ rect-bottom
   index: -1
 rect-player-level-bg
   rotate: false
-  xy: 251, 38
+  xy: 1007, 639
   size: 16, 16
   split: 3, 3, 3, 3
   pad: 7, 7, 7, 7
@@ -109,7 +109,7 @@ rect-player-level-bg
   index: -1
 rect-top
   rotate: false
-  xy: 941, 623
+  xy: 791, 557
   size: 32, 32
   split: 0, 0, 0, 8
   pad: 2, 2, 2, 9
@@ -118,7 +118,7 @@ rect-top
   index: -1
 rect1
   rotate: false
-  xy: 725, 557
+  xy: 217, 22
   size: 32, 32
   split: 5, 5, 5, 5
   pad: 7, 7, 7, 7
@@ -127,7 +127,7 @@ rect1
   index: -1
 rect2
   rotate: false
-  xy: 725, 557
+  xy: 217, 22
   size: 32, 32
   split: 6, 6, 6, 6
   orig: 32, 32
@@ -135,7 +135,7 @@ rect2
   index: -1
 rect3
   rotate: false
-  xy: 725, 557
+  xy: 217, 22
   size: 32, 32
   split: 6, 6, 6, 6
   pad: 6, 6, 12, 6
@@ -180,7 +180,7 @@ window-rect
   index: -1
 window-stage-background
   rotate: false
-  xy: 509, 413
+  xy: 1007, 621
   size: 16, 16
   split: 1, 1, 1, 1
   pad: 0, 0, 0, 0
@@ -210,42 +210,70 @@ silver
   index: -1
 notification-btn-down
   rotate: false
-  xy: 759, 563
+  xy: 791, 529
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
   index: -1
 notification-btn-up
   rotate: false
-  xy: 725, 529
+  xy: 251, 28
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
   index: -1
+place-lock-btn-down
+  rotate: false
+  xy: 575, 459
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+place-lock-btn-up
+  rotate: false
+  xy: 509, 393
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+place-play-btn-down
+  rotate: false
+  xy: 941, 591
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+place-play-btn-up
+  rotate: false
+  xy: 725, 525
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
 settings-btn-down
   rotate: false
-  xy: 575, 497
+  xy: 641, 497
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
   index: -1
 settings-btn-up
   rotate: false
-  xy: 509, 431
+  xy: 575, 431
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
   index: -1
 trophy-btn-down
   rotate: false
-  xy: 975, 629
+  xy: 509, 331
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
   index: -1
 trophy-btn-up
   rotate: false
-  xy: 941, 595
+  xy: 825, 563
   size: 26, 26
   orig: 26, 26
   offset: 0, 0

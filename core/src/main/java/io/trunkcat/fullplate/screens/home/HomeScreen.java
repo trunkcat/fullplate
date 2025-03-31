@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.screens;
+package io.trunkcat.fullplate.screens.home;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -30,6 +30,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
@@ -39,69 +40,19 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import io.trunkcat.fullplate.CookGame;
+import io.trunkcat.fullplate.entities.PlaceData;
 
-class MapGestureHandler extends GestureDetector.GestureAdapter {
-    private final OrthographicCamera camera;
-    public static float INITIAL_ZOOM = 1f;
-    private final Vector2 boundaries;
-
-    MapGestureHandler(OrthographicCamera camera, float boundaryX, float boundaryY) {
-        this.camera = camera;
-        camera.zoom = INITIAL_ZOOM;
-        this.boundaries = new Vector2(boundaryX, boundaryY);
-    }
-
-    @Override
-    public boolean pan(float x, float y, float deltaX, float deltaY) {
-        Vector2 delta = new Vector2(-deltaX * camera.zoom, deltaY * camera.zoom);
-        Vector2 dest = new Vector2(camera.position.x + delta.x, camera.position.y + delta.y);
-
-        float effectiveViewportWidth = camera.viewportWidth * camera.zoom;
-        float effectiveViewportHeight = camera.viewportHeight * camera.zoom;
-
-        if (dest.x < effectiveViewportWidth / 2f || dest.x > boundaries.x - effectiveViewportWidth / 2) {
-            delta.x = 0;
-        }
-        if (dest.y < effectiveViewportHeight / 2f || dest.y > boundaries.y - effectiveViewportHeight / 2) {
-            delta.y = 0;
-        }
-        camera.translate(delta);
-        return true;
-    }
-
-    // TODO: implement and finish zoom
-    @Override
-    public boolean zoom(float initialDistance, float distance) {
-//        Vector2 pointA = new Vector2(Gdx.input.getX(0), Gdx.input.getY(0));
-//        Vector2 pointB = new Vector2(Gdx.input.getX(1), Gdx.input.getY(1));
-//        Vector2 zoomCenter = new Vector2((pointA.x + pointB.x) / 2f, (pointA.y + pointB.y) / 2f);
-//
-//        float zoomFactor = camera.zoom * (initialDistance / distance);
-//        zoomFactor = Math.max(0.5f, Math.min(Math.min(boundaries.x / camera.viewportWidth, boundaries.y / camera.viewportHeight), zoomFactor));
-//        Gdx.app.log("Camera", zoomFactor + " " + camera.viewportWidth / boundaries.x);
-//        camera.zoom = zoomFactor;
-//
-////        float targetZoom = camera.zoom * (initialDistance / distance);
-////        float maxZoom = boundaries.x / camera.viewportWidth * targetZoom;
-////        targetZoom = Math.max(0.5f, Math.min(maxZoom, targetZoom));
-////        camera.zoom = MathUtils.lerp(camera.zoom, targetZoom, 0.05f);
-////        camera.zoom = Math.max(0.5f, Math.min(maxZoom, camera.zoom));
-        return true;
-    }
-}
 
 public class HomeScreen implements com.badlogic.gdx.Screen {
     private final CookGame game;
 
     private final Stage hudStage;
-
     private final Stage mapStage;
-    private final OrthographicCamera mapCamera;
-
-    private final MapGestureHandler mapGestureHandler;
+    private final MapGestureListener mapGestureHandler;
 
     public HomeScreen() {
         game = CookGame.getInstance();
@@ -109,7 +60,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         hudStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         setupHUD();
 
-        mapCamera = new OrthographicCamera();
+        OrthographicCamera mapCamera = new OrthographicCamera();
         FitViewport mapViewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), mapCamera);
         mapStage = new Stage(mapViewport);
         Image mapImage = new Image(new Texture(Gdx.files.internal("backgrounds/map-ref.png")));
@@ -124,9 +75,29 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         mapCamera.position.set(mapViewport.getWorldWidth() / 2f, mapViewport.getWorldHeight() / 2f, 0f); // TODO: figure this out
 
         mapStage.addActor(mapImage);
-        mapGestureHandler = new MapGestureHandler(mapCamera, mapImage.getWidth(), mapImage.getHeight());
-    }
+        mapGestureHandler = new MapGestureListener(mapCamera, mapImage.getWidth(), mapImage.getHeight());
 
+        PlaceData[] samplePlaces = new PlaceData[]{
+            new PlaceData(
+                "burger-place",
+                PlaceData.PlaceType.RESTAURANT,
+                "Burger Place",
+                "A place for burgers",
+                false,
+                new Vector2(2000, 400)
+            ),
+            new PlaceData(
+                "noodle-stand",
+                PlaceData.PlaceType.RESTAURANT,
+                "Noodle stand",
+                "Craving for noodles? You got it!",
+                true,
+                new Vector2(1500, 700)
+            )
+        };
+
+        setupMapPlaces(samplePlaces);
+    }
 
     @Override
     public void show() {
@@ -235,8 +206,10 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         // TODO: SLightly update the width of each button to make it look better (hack).
         //  Fix this by actually fixing the padding on the source skin styles.
         bottomBar.layout();
-        for (Cell children : bottomBar.getCells()) {
-            children.width(children.getPrefWidth() + 30f);
+        for (Cell<?> children : bottomBar.getCells()) {
+            if (children.getActor() instanceof TextButton) {
+                children.width(children.getPrefWidth() + 30f);
+            }
         }
 
         mainTable.top();
@@ -249,13 +222,72 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         hudStage.addActor(mainTable);
     }
 
+    class PlacePointer extends Button {
+        private PlaceData placeData;
+
+        public PlacePointer(PlaceData placeData) {
+            this.placeData = placeData;
+
+            if (placeData.isLocked()) {
+                this.setStyle(game.skin.get("place-lock-button", ButtonStyle.class));
+            } else {
+                this.setStyle(game.skin.get("place-play-button", ButtonStyle.class));
+            }
+
+            addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    Window window = createWindow();
+                    Table content = new Table();
+                    content.defaults().pad(10).fillX();
+
+                    Label heading = new Label(placeData.getName(), game.skin, "h1");
+                    Label description = new Label(placeData.getDescription(), game.skin, "h2");
+
+                    content.add(heading).expandX().left();
+                    content.row();
+                    content.add(description).expandX().left();
+                    content.row();
+
+                    TextButton closeButton = new TextButton("Close", game.skin);
+                    closeButton.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            window.remove();
+                        }
+                    });
+                    content.add(closeButton);
+
+                    setWindowContent(window, content);
+                    hudStage.addActor(window);
+                }
+            });
+
+            setBounds(
+                placeData.getPosition().x,
+                placeData.getPosition().y,
+                100, 100
+            );
+            setOrigin(Align.center);
+        }
+    }
+
+    private void setupMapPlaces(PlaceData[] places) {
+        Group placesGroup = new Group();
+
+        for (PlaceData placeData : places) {
+            placesGroup.addActor(new PlacePointer(placeData));
+        }
+
+        mapStage.addActor(placesGroup);
+    }
+
     private Window createWindow() {
         Window window = new Window("", game.skin);
         window.setMovable(false);
         window.setModal(true);
         window.setKeepWithinStage(true);
         window.setResizable(false);
-
         return window;
     }
 
@@ -263,7 +295,6 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         Vector2 tableSize = calculateTableSize(content);
         float windowWidth = tableSize.x + window.getStyle().background.getMinWidth() + 100;
         float windowHeight = tableSize.y + window.getStyle().background.getMinHeight() + 100;
-        Gdx.app.log("size", "" + tableSize + " " + window.getStyle().background.getMinWidth() + " " + window.getStyle().background.getMinHeight());
         window.setSize(windowWidth, windowHeight);
         window.setPosition(
             Gdx.graphics.getWidth() / 2f - windowWidth / 2f,
@@ -275,7 +306,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
     private Vector2 calculateTableSize(Table table) {
         Vector2 size = new Vector2();
         table.layout();
-        for (Cell cell : table.getCells()) {
+        for (Cell<?> cell : table.getCells()) {
             size.x += cell.getPrefWidth();
             size.y += cell.getPrefHeight();
         }

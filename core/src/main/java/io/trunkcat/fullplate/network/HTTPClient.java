@@ -84,6 +84,7 @@ public class HTTPClient {
                             responseHandler.success(response.getData());
                         } else {
                             responseHandler.failure(response.getMessage());
+                            Gdx.app.log("HTTP", "Response was not ok: " + response.getMessage());
                         }
                     });
                 } catch (Exception e) {
@@ -94,6 +95,7 @@ public class HTTPClient {
 
             public void failed(Throwable t) {
                 responseHandler.failure("Failed to connect");
+                Gdx.app.error("HTTP", "Failed to connect: " + t.getMessage());
             }
 
             public void cancelled() {
