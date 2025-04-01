@@ -45,7 +45,6 @@ public class PlaceData {
                      PlaceType type,
                      String name,
                      String description,
-                     String info,
                      Integer cost,
                      int requiredLevel,
                      int levelCount,
@@ -55,7 +54,6 @@ public class PlaceData {
         this.type = type;
         this.name = name;
         this.description = description;
-        this.info = info;
         this.cost = cost;
         this.requiredLevel = requiredLevel;
         this.levelCount = levelCount;
@@ -93,10 +91,6 @@ public class PlaceData {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getInfo() {
-        return info;
     }
 
     public Integer getCost() {

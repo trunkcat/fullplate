@@ -228,7 +228,7 @@ silver
   index: -1
 textbutton-disabled
   rotate: false
-  xy: 199, 168
+  xy: 1, 2
   size: 12, 19
   split: 2, 2, 7, 6
   pad: 5, 5, 7, 6
@@ -237,7 +237,7 @@ textbutton-disabled
   index: -1
 textbutton-down
   rotate: false
-  xy: 1, 2
+  xy: 63, 36
   size: 12, 19
   split: 2, 2, 7, 6
   pad: 5, 5, 7, 6
@@ -246,7 +246,7 @@ textbutton-down
   index: -1
 textbutton-up
   rotate: false
-  xy: 63, 36
+  xy: 161, 74
   size: 12, 19
   split: 2, 2, 5, 7
   pad: 5, 5, 8, 9
@@ -265,6 +265,20 @@ trophy-btn-up
   xy: 161, 95
   size: 26, 26
   orig: 26, 26
+  offset: 0, 0
+  index: -1
+vertical-knob
+  rotate: false
+  xy: 1007, 389
+  size: 13, 37
+  orig: 13, 37
+  offset: 0, 0
+  index: -1
+vscroll
+  rotate: false
+  xy: 199, 123
+  size: 13, 64
+  orig: 13, 64
   offset: 0, 0
   index: -1
 window-rect

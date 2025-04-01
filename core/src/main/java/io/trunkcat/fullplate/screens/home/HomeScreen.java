@@ -37,6 +37,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
@@ -84,7 +85,6 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                 PlaceData.PlaceType.RESTAURANT,
                 "Burger Place",
                 "A place for burgers",
-                "Burger info",
                 null,
                 0,
                 5,
@@ -95,7 +95,6 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                 PlaceData.PlaceType.RESTAURANT,
                 "Noodle stand",
                 "Craving for noodles? You got it!",
-                "Noodles info",
                 1000,
                 1,
                 5,
@@ -106,10 +105,9 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                 PlaceData.PlaceType.RESTAURANT,
                 "Pizza Place",
                 "Dem Pizzas!!!",
-                "Pizza info",
                 2000,
                 15,
-                10,
+                40,
                 true,
                 new Vector2(1750, 1000))};
 
@@ -310,7 +308,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                     TextButton playButton = getTextButton(heading);
 
                     if (placeData.getCost() != null && placeData.isLocked()) {
-                        Label info = new Label(placeData.getInfo(), game.skin, "h2");
+                        Label info = new Label(placeData.getDescription(), game.skin, "h2");
                         content.add(info).expandX().left();
                         content.row();
                         Label cost = new Label("$ " + placeData.getCost().toString(), game.skin, "h1");
@@ -337,7 +335,6 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                 private TextButton getTextButton(Label heading) {
                     TextButton playButton = new TextButton("Play", game.skin);
 
-
                     playButton.addListener(new ChangeListener() {
                         @Override
                         public void changed(ChangeEvent event, Actor actor) {
@@ -355,6 +352,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                             Table levelsTable = new Table();
                             levelsTable.defaults().pad(10).fillX();
 
+                            // Add levels to the table
                             ButtonGroup<Button> buttonGroup = new ButtonGroup<>();
                             buttonGroup.setMaxCheckCount(1);
                             buttonGroup.setMinCheckCount(1);
@@ -363,19 +361,22 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                             for (int i = 1; i <= levelCount; i++) {
                                 TextButton button = new TextButton(String.valueOf(i), game.skin);
                                 buttonGroup.add(button);
-                                levelsTable.add(button).expandX();
-                                if (i % 3 == 0) levelsTable.row();
+                                levelsTable.add(button).expandX().fillX();
+                                if (i % 3 == 0) levelsTable.row(); // New row every 3 buttons
                             }
 
                             levelsTable.row();
 
+                            ScrollPane scrollPane = new ScrollPane(levelsTable, game.skin);
+                            scrollPane.setScrollingDisabled(true, false);
+                            scrollPane.setFadeScrollBars(true);
+
                             levelContent.add(heading).expandX().left();
                             levelContent.row();
-                            levelContent.add(levelsTable);
+                            levelContent.add(scrollPane).expand().fill().height(300);
                             levelContent.row();
                             levelContent.add(closeButton).expandX().uniform();
                             levelContent.row();
-
 
                             setWindowContent(levelWindow, levelContent);
                             hudStage.addActor(levelWindow);
