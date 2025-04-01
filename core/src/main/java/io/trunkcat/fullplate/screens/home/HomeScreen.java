@@ -277,23 +277,35 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                     TextButton buyButton = new TextButton("Buy", game.skin);
                     buyButton.addListener(new ChangeListener() {
                         private boolean errorLabelAdded = false;
+                        boolean unlockable = game.player.data.getStats().getPlayerLevel() >= placeData.getRequiredLevel();
                         @Override
                         public void changed(ChangeEvent event, Actor actor) {
-                            int playerMoney = game.player.data.getStats().getCoins();
-                            if(playerMoney >= placeData.getCost()) {
-                                placeData.setLocked(false);
-                                setStyle(game.skin.get("place-play-button", ButtonStyle.class));
-                                game.player.data.getStats().setCoins(playerMoney-placeData.getCost());
-                                hudStage.clear();
-                                setupHUD();
-                                window.remove();
+                            if(unlockable) {
+                                int playerMoney = game.player.data.getStats().getCoins();
+                                if(playerMoney >= placeData.getCost()) {
+                                    placeData.setLocked(false);
+                                    setStyle(game.skin.get("place-play-button", ButtonStyle.class));
+                                    game.player.data.getStats().setCoins(playerMoney-placeData.getCost());
+                                    hudStage.clear();
+                                    setupHUD();
+                                    window.remove();
+                                } else {
+                                    if(!errorLabelAdded) {
+                                        Label neededMoney = new Label("You need $" + (int)(placeData.getCost() - playerMoney) + "!", game.skin, "h1");
+                                        content.add(neededMoney).expandX().uniform();
+                                        content.row();
+                                        errorLabelAdded = true;
+                                    }
+                                }
                             } else {
                                 if(!errorLabelAdded) {
-                                    Label neededMoney = new Label("You need $" + (int)(placeData.getCost() - playerMoney) + "!", game.skin, "h1");
-                                    content.add(neededMoney).expandX().uniform();
+                                    Label lockState = new Label("You do not meet the levels to unlock this place!", game.skin, "h2");
+                                    lockState.setWrap(true);
+                                    content.add(lockState).expandX().fillX().pad(10).uniform();
                                     content.row();
                                     errorLabelAdded = true;
                                 }
+
                             }
                         }
                     });

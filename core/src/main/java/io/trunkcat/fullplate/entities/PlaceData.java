@@ -97,6 +97,8 @@ public class PlaceData {
 
     public Integer getCost() { return cost; }
 
+    public int getRequiredLevel() { return requiredLevel; }
+
     public boolean isLocked() {
         return locked;
     }
