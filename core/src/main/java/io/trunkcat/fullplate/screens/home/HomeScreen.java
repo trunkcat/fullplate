@@ -43,6 +43,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import org.w3c.dom.Text;
+
+import java.util.Locale;
+
 import io.trunkcat.fullplate.CookGame;
 import io.trunkcat.fullplate.entities.PlaceData;
 
@@ -83,6 +87,9 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                 PlaceData.PlaceType.RESTAURANT,
                 "Burger Place",
                 "A place for burgers",
+                "Burger info",
+                null,
+                0,
                 false,
                 new Vector2(2000, 400)
             ),
@@ -91,8 +98,22 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                 PlaceData.PlaceType.RESTAURANT,
                 "Noodle stand",
                 "Craving for noodles? You got it!",
+                "Noodles info",
+                1000,
+                1,
                 true,
                 new Vector2(1500, 700)
+            ),
+            new PlaceData(
+                "pizza=place",
+                PlaceData.PlaceType.RESTAURANT,
+                "Pizza Place",
+                "Dem Pizzas!!!",
+                "Pizza info",
+                2000,
+                15,
+                true,
+                new Vector2(1750, 1000)
             )
         };
 
@@ -242,11 +263,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                     content.defaults().pad(10).fillX();
 
                     Label heading = new Label(placeData.getName(), game.skin, "h1");
-                    Label description = new Label(placeData.getDescription(), game.skin, "h2");
-
                     content.add(heading).expandX().left();
-                    content.row();
-                    content.add(description).expandX().left();
                     content.row();
 
                     TextButton closeButton = new TextButton("Close", game.skin);
@@ -256,7 +273,53 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                             window.remove();
                         }
                     });
-                    content.add(closeButton);
+
+                    TextButton buyButton = new TextButton("Buy", game.skin);
+                    buyButton.addListener(new ChangeListener() {
+                        private boolean errorLabelAdded = false;
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            int playerMoney = game.player.data.getStats().getCoins();
+                            if(playerMoney >= placeData.getCost()) {
+                                placeData.setLocked(false);
+                                setStyle(game.skin.get("place-play-button", ButtonStyle.class));
+                                game.player.data.getStats().setCoins(playerMoney-placeData.getCost());
+                                hudStage.clear();
+                                setupHUD();
+                                window.remove();
+                            } else {
+                                if(!errorLabelAdded) {
+                                    Label neededMoney = new Label("You need $" + (int)(placeData.getCost() - playerMoney) + "!", game.skin, "h1");
+                                    content.add(neededMoney).expandX().uniform();
+                                    content.row();
+                                    errorLabelAdded = true;
+                                }
+                            }
+                        }
+                    });
+
+
+                    if(placeData.getCost() != null && placeData.isLocked()) {
+                        Label info = new Label(placeData.getInfo(), game.skin, "h2");
+                        content.add(info).expandX().left();
+                        content.row();
+                        Label cost = new Label("$ " + placeData.getCost().toString(), game.skin, "h1");
+                        content.add(cost).expandX().center();
+                        content.row();
+                        content.add(closeButton).expandX().left().uniform();
+                        content.add(buyButton).fillX().uniform();
+                        content.row();
+                    } else {
+                        //TODO : Get Play button and its window working
+                        Label description = new Label(placeData.getDescription(), game.skin, "h2");
+                        content.add(description).expandX().left();
+                        content.row();
+                        content.add(closeButton).expandX().left();
+                        content.row();
+                    }
+
+
+                    //content.add(closeButton);
 
                     setWindowContent(window, content);
                     hudStage.addActor(window);

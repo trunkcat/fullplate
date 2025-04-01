@@ -40,16 +40,30 @@ button-up
   orig: 214, 64
   offset: 0, 0
   index: -1
+buy-button-down
+  rotate: false
+  xy: 133, 123
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+buy-button-up
+  rotate: false
+  xy: 67, 57
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
 notification-btn-down
   rotate: false
-  xy: 67, 95
+  xy: 133, 95
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
   index: -1
 notification-btn-up
   rotate: false
-  xy: 133, 161
+  xy: 251, 210
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
@@ -193,14 +207,14 @@ rect3
   index: -1
 settings-btn-down
   rotate: false
-  xy: 251, 210
+  xy: 283, 242
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
   index: -1
 settings-btn-up
   rotate: false
-  xy: 283, 242
+  xy: 35, 29
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
@@ -214,7 +228,7 @@ silver
   index: -1
 textbutton-disabled
   rotate: false
-  xy: 1, 2
+  xy: 199, 168
   size: 12, 19
   split: 2, 2, 7, 6
   pad: 5, 5, 7, 6
@@ -223,7 +237,7 @@ textbutton-disabled
   index: -1
 textbutton-down
   rotate: false
-  xy: 95, 102
+  xy: 1, 2
   size: 12, 19
   split: 2, 2, 7, 6
   pad: 5, 5, 7, 6
@@ -232,7 +246,7 @@ textbutton-down
   index: -1
 textbutton-up
   rotate: false
-  xy: 133, 140
+  xy: 63, 36
   size: 12, 19
   split: 2, 2, 5, 7
   pad: 5, 5, 8, 9
@@ -241,14 +255,14 @@ textbutton-up
   index: -1
 trophy-btn-down
   rotate: false
-  xy: 35, 29
+  xy: 133, 67
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
   index: -1
 trophy-btn-up
   rotate: false
-  xy: 67, 67
+  xy: 161, 95
   size: 26, 26
   orig: 26, 26
   offset: 0, 0

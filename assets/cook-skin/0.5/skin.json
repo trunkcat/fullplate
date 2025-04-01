@@ -102,6 +102,10 @@ com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
 		up: place-lock-btn-up
 		down: place-lock-btn-down
 	}
+	buy-button: {
+		up: buy-button-up
+		down: buy-button-down
+	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	default: {
