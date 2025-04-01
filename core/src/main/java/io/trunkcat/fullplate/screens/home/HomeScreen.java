@@ -33,6 +33,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -42,10 +43,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-
-import org.w3c.dom.Text;
-
-import java.util.Locale;
 
 import io.trunkcat.fullplate.CookGame;
 import io.trunkcat.fullplate.entities.PlaceData;
@@ -90,9 +87,9 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                 "Burger info",
                 null,
                 0,
+                5,
                 false,
-                new Vector2(2000, 400)
-            ),
+                new Vector2(2000, 400)),
             new PlaceData(
                 "noodle-stand",
                 PlaceData.PlaceType.RESTAURANT,
@@ -101,21 +98,20 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                 "Noodles info",
                 1000,
                 1,
+                5,
                 true,
-                new Vector2(1500, 700)
-            ),
+                new Vector2(1500, 700)),
             new PlaceData(
-                "pizza=place",
+                "pizza-place",
                 PlaceData.PlaceType.RESTAURANT,
                 "Pizza Place",
                 "Dem Pizzas!!!",
                 "Pizza info",
                 2000,
                 15,
+                10,
                 true,
-                new Vector2(1750, 1000)
-            )
-        };
+                new Vector2(1750, 1000))};
 
         setupMapPlaces(samplePlaces);
     }
@@ -248,6 +244,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
 
         public PlacePointer(PlaceData placeData) {
             this.placeData = placeData;
+            TextButton closeButton = new TextButton("Close", game.skin);
 
             if (placeData.isLocked()) {
                 this.setStyle(game.skin.get("place-lock-button", ButtonStyle.class));
@@ -266,7 +263,6 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                     content.add(heading).expandX().left();
                     content.row();
 
-                    TextButton closeButton = new TextButton("Close", game.skin);
                     closeButton.addListener(new ChangeListener() {
                         @Override
                         public void changed(ChangeEvent event, Actor actor) {
@@ -278,27 +274,28 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                     buyButton.addListener(new ChangeListener() {
                         private boolean errorLabelAdded = false;
                         boolean unlockable = game.player.data.getStats().getPlayerLevel() >= placeData.getRequiredLevel();
+
                         @Override
                         public void changed(ChangeEvent event, Actor actor) {
-                            if(unlockable) {
+                            if (unlockable) {
                                 int playerMoney = game.player.data.getStats().getCoins();
-                                if(playerMoney >= placeData.getCost()) {
+                                if (playerMoney >= placeData.getCost()) {
                                     placeData.setLocked(false);
                                     setStyle(game.skin.get("place-play-button", ButtonStyle.class));
-                                    game.player.data.getStats().setCoins(playerMoney-placeData.getCost());
+                                    game.player.data.getStats().setCoins(playerMoney - placeData.getCost());
                                     hudStage.clear();
                                     setupHUD();
                                     window.remove();
                                 } else {
-                                    if(!errorLabelAdded) {
-                                        Label neededMoney = new Label("You need $" + (int)(placeData.getCost() - playerMoney) + "!", game.skin, "h1");
+                                    if (!errorLabelAdded) {
+                                        Label neededMoney = new Label("You need $" + (int) (placeData.getCost() - playerMoney) + "!", game.skin, "h1");
                                         content.add(neededMoney).expandX().uniform();
                                         content.row();
                                         errorLabelAdded = true;
                                     }
                                 }
                             } else {
-                                if(!errorLabelAdded) {
+                                if (!errorLabelAdded) {
                                     Label lockState = new Label("You do not meet the levels to unlock this place!", game.skin, "h2");
                                     lockState.setWrap(true);
                                     content.add(lockState).expandX().fillX().pad(10).uniform();
@@ -310,8 +307,9 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                         }
                     });
 
+                    TextButton playButton = getTextButton(heading);
 
-                    if(placeData.getCost() != null && placeData.isLocked()) {
+                    if (placeData.getCost() != null && placeData.isLocked()) {
                         Label info = new Label(placeData.getInfo(), game.skin, "h2");
                         content.add(info).expandX().left();
                         content.row();
@@ -322,27 +320,72 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                         content.add(buyButton).fillX().uniform();
                         content.row();
                     } else {
-                        //TODO : Get Play button and its window working
+                        //TODO : Get Play button window working
                         Label description = new Label(placeData.getDescription(), game.skin, "h2");
                         content.add(description).expandX().left();
                         content.row();
-                        content.add(closeButton).expandX().left();
+                        content.add(closeButton).expandX().left().uniform();
+                        content.add(playButton).fillX().uniform();
                         content.row();
                     }
 
 
-                    //content.add(closeButton);
-
                     setWindowContent(window, content);
                     hudStage.addActor(window);
                 }
+
+                private TextButton getTextButton(Label heading) {
+                    TextButton playButton = new TextButton("Play", game.skin);
+
+
+                    playButton.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            Window levelWindow = createWindow();
+                            Table levelContent = new Table();
+                            levelContent.defaults().pad(10).fillX();
+
+                            closeButton.addListener(new ChangeListener() {
+                                @Override
+                                public void changed(ChangeEvent event, Actor actor) {
+                                    levelWindow.remove();
+                                }
+                            });
+
+                            Table levelsTable = new Table();
+                            levelsTable.defaults().pad(10).fillX();
+
+                            ButtonGroup<Button> buttonGroup = new ButtonGroup<>();
+                            buttonGroup.setMaxCheckCount(1);
+                            buttonGroup.setMinCheckCount(1);
+
+                            int levelCount = placeData.getLevelCount();
+                            for (int i = 1; i <= levelCount; i++) {
+                                TextButton button = new TextButton(String.valueOf(i), game.skin);
+                                buttonGroup.add(button);
+                                levelsTable.add(button).expandX();
+                                if (i % 3 == 0) levelsTable.row();
+                            }
+
+                            levelsTable.row();
+
+                            levelContent.add(heading).expandX().left();
+                            levelContent.row();
+                            levelContent.add(levelsTable);
+                            levelContent.row();
+                            levelContent.add(closeButton).expandX().uniform();
+                            levelContent.row();
+
+
+                            setWindowContent(levelWindow, levelContent);
+                            hudStage.addActor(levelWindow);
+                        }
+                    });
+                    return playButton;
+                }
             });
 
-            setBounds(
-                placeData.getPosition().x,
-                placeData.getPosition().y,
-                100, 100
-            );
+            setBounds(placeData.getPosition().x, placeData.getPosition().y, 100, 100);
             setOrigin(Align.center);
         }
     }
@@ -371,10 +414,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         float windowWidth = tableSize.x + window.getStyle().background.getMinWidth() + 100;
         float windowHeight = tableSize.y + window.getStyle().background.getMinHeight() + 100;
         window.setSize(windowWidth, windowHeight);
-        window.setPosition(
-            Gdx.graphics.getWidth() / 2f - windowWidth / 2f,
-            Gdx.graphics.getHeight() / 2f - windowHeight / 2f
-        );
+        window.setPosition(Gdx.graphics.getWidth() / 2f - windowWidth / 2f, Gdx.graphics.getHeight() / 2f - windowHeight / 2f);
         window.add(content).expand().fill();
     }
 

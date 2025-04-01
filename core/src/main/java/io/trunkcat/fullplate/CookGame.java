@@ -33,10 +33,7 @@ import io.trunkcat.fullplate.entities.Player;
 import io.trunkcat.fullplate.models.PlayerData;
 import io.trunkcat.fullplate.models.responses.PlayerStats;
 import io.trunkcat.fullplate.network.HTTPClient;
-import io.trunkcat.fullplate.screens.LoadingScreen;
-import io.trunkcat.fullplate.screens.LoginScreen;
 import io.trunkcat.fullplate.screens.home.HomeScreen;
-import io.trunkcat.fullplate.utilities.Constants;
 import io.trunkcat.fullplate.utilities.GameFont;
 
 public class CookGame extends Game {
@@ -57,7 +54,7 @@ public class CookGame extends Game {
         preferences = Gdx.app.getPreferences("Full plate Preferences");
         skin = new Skin(Gdx.files.internal("cook-skin/0.5/skin.json"));
 
-        PlayerStats stats = new PlayerStats(10, 500, 2000);
+        PlayerStats stats = new PlayerStats(69, 10000, 2000);
         player.data = new PlayerData(12, "swassy", stats);
         setScreen(new HomeScreen());
 

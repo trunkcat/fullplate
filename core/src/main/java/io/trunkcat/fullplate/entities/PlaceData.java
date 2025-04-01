@@ -31,7 +31,7 @@ public class PlaceData {
     private String description;
     private String info;
     private Integer cost;
-
+    private int levelCount;
     private int requiredLevel;
     private boolean locked;
     private Vector2 position;
@@ -48,6 +48,7 @@ public class PlaceData {
                      String info,
                      Integer cost,
                      int requiredLevel,
+                     int levelCount,
                      boolean locked,
                      Vector2 position) {
         this.id = id;
@@ -57,6 +58,7 @@ public class PlaceData {
         this.info = info;
         this.cost = cost;
         this.requiredLevel = requiredLevel;
+        this.levelCount = levelCount;
         this.locked = locked;
         this.position = position;
     }
@@ -93,11 +95,21 @@ public class PlaceData {
         this.description = description;
     }
 
-    public String getInfo() { return info; }
+    public String getInfo() {
+        return info;
+    }
 
-    public Integer getCost() { return cost; }
+    public Integer getCost() {
+        return cost;
+    }
 
-    public int getRequiredLevel() { return requiredLevel; }
+    public int getRequiredLevel() {
+        return requiredLevel;
+    }
+
+    public int getLevelCount() {
+        return levelCount;
+    }
 
     public boolean isLocked() {
         return locked;
