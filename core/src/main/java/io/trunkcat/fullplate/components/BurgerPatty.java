@@ -22,9 +22,9 @@
 
 package io.trunkcat.fullplate.components;
 
-import io.trunkcat.fullplate.components.base.CookableFood;
+import io.trunkcat.fullplate.components.base.Food;
 
-public class BurgerPatty extends CookableFood {
+public class BurgerPatty extends Food {
     public BurgerPatty(int level) {
         super(ItemID.BURGER_PATTY, level, State.UNPREPARED);
     }
