@@ -25,14 +25,12 @@ package io.trunkcat.fullplate.components.base;
 import com.badlogic.gdx.graphics.Texture;
 
 import io.trunkcat.fullplate.components.ItemID;
-import io.trunkcat.fullplate.utilities.AssetManager;
 
 public abstract class Food extends SellableItem {
     protected State currentState;
 
     public enum State {
         UNPREPARED("unprepared"),
-        PREPARING("preparing"),
         UNDER_PREPARED("under-prepared"),
         PREPARED("prepared"),
         //        OVER_PREPARED("over-prepared"), // TODO: add this state
@@ -61,12 +59,8 @@ public abstract class Food extends SellableItem {
         currentState = newState;
     }
 
+    @Override
     public Texture getTexture() {
-        return loadStateTexture(itemId, currentState);
-    }
-
-    public static Texture loadStateTexture(ItemID itemId, State state) {
-        // TODO: consider level
-        return AssetManager.loadTexture("items/" + itemId.id + "_" + state.value + ".png");
+        return loadTexture(itemId, currentState.value);
     }
 }

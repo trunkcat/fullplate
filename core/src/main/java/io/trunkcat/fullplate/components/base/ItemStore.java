@@ -23,12 +23,11 @@
 package io.trunkcat.fullplate.components.base;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 
 import io.trunkcat.fullplate.components.ItemID;
-import io.trunkcat.fullplate.utilities.AssetManager;
 
 public abstract class ItemStore extends Item {
     private final ItemID stockItemId;
@@ -85,6 +84,19 @@ public abstract class ItemStore extends Item {
         return stock > 0;
     }
 
+    public State getCurrentState() {
+        return currentState;
+    }
+
+    private void setCurrentState(State state) {
+        this.currentState = state;
+    }
+
+    @Override
+    public Texture getTexture() {
+        return loadTexture(itemId, currentState.value);
+    }
+
     protected abstract Item produceItem();
 
     @Override
@@ -99,22 +111,19 @@ public abstract class ItemStore extends Item {
         setCurrentState(State.fromStock(stock));
     }
 
-    public State getCurrentState() {
-        return currentState;
-    }
-
-    private void setCurrentState(State state) {
-        this.currentState = state;
-    }
-
     @Override
-    public Texture getTexture() {
-        return loadStateTexture(itemId, currentState);
-    }
+    public boolean handle(Event event) {
+        super.handle(event);
 
-    public static Texture loadStateTexture(ItemID itemId, State state) {
-        // TODO: consider level
-        return AssetManager.loadTexture("items/" + itemId.id + "_" + state.value + ".png");
+        if (event instanceof KitchenEvent.FoodConsumeEvent) {
+            KitchenEvent.FoodConsumeEvent e = (KitchenEvent.FoodConsumeEvent) event;
+            if (e.getProvider() == this) {
+                e.getFood().remove();
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -125,11 +134,14 @@ public abstract class ItemStore extends Item {
                 if (!hasStock()) {
                     return null;
                 }
+
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
                 Item producedItem = produceItem();
                 stock -= 1;
                 payload.setDragActor(producedItem);
                 getStage().addActor(producedItem);
+
+                producedItem.setScale(5f);
                 return payload;
             }
 
@@ -145,29 +157,6 @@ public abstract class ItemStore extends Item {
                     stock += 1;
                     payload.getDragActor().remove();
                 }
-            }
-        };
-    }
-
-    @Override
-    public DragAndDrop.Target getDropTarget() {
-        return new DragAndDrop.Target(this) {
-            @Override
-            public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                if (payload == null) {
-                    return false;
-                }
-                Actor dragActor = payload.getDragActor();
-                if (!(dragActor instanceof Item)) {
-                    return false;
-                }
-                return ((Item) dragActor).getItemId().equals(stockItemId);
-            }
-
-            @Override
-            public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                stock += 1;
-                payload.getDragActor().remove();
             }
         };
     }

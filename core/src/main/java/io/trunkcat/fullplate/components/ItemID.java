@@ -22,27 +22,45 @@
 
 package io.trunkcat.fullplate.components;
 
-// TODO: make this like item details, and have item type as a property as well: food holder, food cooker etc
+// TODO: make this like item details, and add the game asset name
 public enum ItemID {
-    SIMPLE_BURGER("simple-burger"),
-    CHEESE_BURGER("cheese-burger"),
-    DOUBLE_CHEESE_BURGER("double-cheese-burger"),
-    VEGGIE_BURGER("veggie-burger"),
+    COMPOSITE_FOOD("composite-food", Type._INTERNAL),
 
-    BURGER_BUN("burger-bun"),
-    BURGER_BUN_TRAY("burger-bun-tray"),
-    BURGER_PATTY("burger-patty"),
-    BURGER_PATTY_TRAY("burger-patty-tray"),
+    FRYING_PAN("frying-pan", Type.FOOD_COOKER),
+    CUTTING_BOARD("cutting-board", Type.FOOD_COOKER),
 
-    CHEESE("cheese"),
-    LETTUCE("lettuce"),
-    TOMATO("tomato"),
+    BURGER("burger", Type.COMBINATION),
 
-    PLATE("plate");
+    BURGER_BUN("burger-bun", Type.FOOD),
+    BURGER_BUN_TRAY("burger-bun-tray", Type.ITEM_STORE),
+
+    OLIVE_OIL("olive-oil", Type.COOKABLE_FOOD),
+    BURGER_PATTY("burger-patty", Type.COOKABLE_FOOD),
+    BURGER_PATTY_TRAY("burger-patty-tray", Type.ITEM_STORE),
+
+    CHEESE("cheese", Type.FOOD),
+    LETTUCE("lettuce", Type.FOOD),
+    TOMATO("tomato", Type.FOOD),
+    TOMATO_BOWL("tomato-bowl", Type.ITEM_STORE),
+
+    PLATE("plate-2", Type.FOOD_HOLDER);
+
+    public enum Type {
+        _INTERNAL,
+        COMBINATION,
+        FOOD,
+        COOKABLE_FOOD,
+        ITEM_STORE,
+        FOOD_HOLDER,
+        FOOD_COOKER
+    }
 
     public final String id;
+    public final Type type;
 
-    ItemID(String itemId) {
+    ItemID(String itemId, Type type) {
         this.id = itemId;
+        this.type = type;
     }
+
 }

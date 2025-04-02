@@ -1,36 +1,18 @@
 # Full plate
 
-A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
+## Developer Notes
 
-This project was generated with a template including simple application launchers and a main class extending `Game` that sets the first screen.
+### Drag and Drop Architecture In Kitchen
 
-## Platforms
+Here are some details regarding the usage of the `DragAndDrop` class in this project:
 
-- `core`: Main module with the application logic shared by all platforms.
-- `lwjgl3`: Primary desktop platform using LWJGL3; was called 'desktop' in older docs.
-- `android`: Android mobile platform. Needs Android SDK.
-- `ios`: iOS mobile platform using RoboVM.
+1. Component actors have two methods:
+    - `getDragSource()`: Should return a `DragAndDrop.Source` object where source is the actor.
+    - `getDropTarget()`: Should return a `DragAndDrop.Target` object where source is the actor.
 
-## Gradle
-
-This project uses [Gradle](https://gradle.org/) to manage dependencies.
-The Gradle wrapper was included, so you can run Gradle tasks using `gradlew.bat` or `./gradlew` commands.
-Useful Gradle tasks and flags:
-
-- `--continue`: when using this flag, errors will not stop the tasks from running.
-- `--daemon`: thanks to this flag, Gradle daemon will be used to run chosen tasks.
-- `--offline`: when using this flag, cached dependency archives will be used.
-- `--refresh-dependencies`: this flag forces validation of all dependencies. Useful for snapshot versions.
-- `android:lint`: performs Android project validation.
-- `build`: builds sources and archives of every project.
-- `cleanEclipse`: removes Eclipse project data.
-- `cleanIdea`: removes IntelliJ project data.
-- `clean`: removes `build` folders, which store compiled classes and built archives.
-- `eclipse`: generates Eclipse project data.
-- `idea`: generates IntelliJ project data.
-- `lwjgl3:jar`: builds application's runnable jar, which can be found at `lwjgl3/build/libs`.
-- `lwjgl3:run`: starts the application.
-- `test`: runs unit tests (if any).
-
-Note that most tasks that are not specific to a single project can be run with `name:` prefix, where the `name` should be replaced with the ID of a specific project.
-For example, `core:clean` removes `build` folder only from the `core` project.
+   These methods are called once the actor is added to a stage.
+2. Components should not couple. Use `KitchenEvent` instead and use the `dispatchStageEvent` to
+   dispatch the event onto the stage.
+3. `DragAndDrop.Source::dragStop` should manage the payload only if drop target was found.
+4. `DragAndDrop.Target::drop` should dispatch an `KitchenEvent` and should not mess with the
+   `Payload.dragActor`.

@@ -22,18 +22,25 @@
 
 package io.trunkcat.fullplate.components.base;
 
-import io.trunkcat.fullplate.components.BurgerBun;
+import com.badlogic.gdx.graphics.g2d.Batch;
+
+import java.util.HashMap;
+
 import io.trunkcat.fullplate.components.ItemID;
 
-public class BurgerBunTray extends ItemStore {
-    public BurgerBunTray(int level, int initialStock) {
-        super(ItemID.BURGER_BUN_TRAY, level, ItemID.BURGER_BUN, initialStock);
+public abstract class IngredientsRenderer {
+    protected Batch batch;
+
+    protected IngredientsRenderer() {
     }
 
-    @Override
-    protected Item produceItem() {
-        BurgerBun product = new BurgerBun(1);
-        product.setScale(2f);
-        return product;
+    public void setBatch(Batch batch) {
+        this.batch = batch;
     }
+
+    protected void draw(FoodCombination.PartialIngredient item, float x, float y) {
+        batch.draw(Food.loadTexture(item.getItemId(), item.getState().value), x, y);
+    }
+
+    abstract public void render(HashMap<ItemID, FoodCombination.PartialIngredient> ingredients, float x, float y);
 }

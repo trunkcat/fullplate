@@ -1,0 +1,59 @@
+/*
+ * Copyright (c) 2024-2025 Trunk Cat Studios
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package io.trunkcat.fullplate.components;
+
+import java.util.HashMap;
+
+import io.trunkcat.fullplate.components.base.Food;
+import io.trunkcat.fullplate.components.base.FoodCombination;
+import io.trunkcat.fullplate.components.base.FoodCombinationsManager;
+import io.trunkcat.fullplate.components.base.FoodCooker;
+import io.trunkcat.fullplate.components.base.IngredientsRenderer;
+
+public class CuttingBoard extends FoodCooker {
+    static FoodCombinationsManager COMBINATION_MANAGER = new FoodCombinationsManager();
+
+    static {
+        IngredientsRenderer cuttingBoardItemRenderer = new IngredientsRenderer() {
+            @Override
+            public void render(HashMap<ItemID, FoodCombination.PartialIngredient> ingredients, float x, float y) {
+                if (ingredients.containsKey(ItemID.TOMATO)) {
+                    draw(ingredients.get(ItemID.TOMATO), x, y);
+                }
+            }
+        };
+
+        FoodCombination slicedTomato = new FoodCombination(ItemID.TOMATO, Food.State.PREPARED, cuttingBoardItemRenderer)
+            .addIngredient(new FoodCombination.Ingredient(ItemID.TOMATO, 1, Food.State.UNPREPARED));
+        slicedTomato
+            .setCookingTime(0f)
+            .setCookingPossible(true)
+            .setOvercookingPossible(false);
+
+        COMBINATION_MANAGER.addCombination(slicedTomato);
+    }
+
+    public CuttingBoard(int level) {
+        super(ItemID.CUTTING_BOARD, level, COMBINATION_MANAGER);
+    }
+}

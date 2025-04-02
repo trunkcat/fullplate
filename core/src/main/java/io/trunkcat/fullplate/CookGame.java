@@ -30,9 +30,10 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import io.trunkcat.fullplate.entities.Player;
+import io.trunkcat.fullplate.models.PlayerData;
+import io.trunkcat.fullplate.models.responses.PlayerStats;
 import io.trunkcat.fullplate.network.HTTPClient;
-import io.trunkcat.fullplate.screens.LoadingScreen;
-import io.trunkcat.fullplate.screens.LoginScreen;
+import io.trunkcat.fullplate.screens.restaurant.LevelScreen;
 import io.trunkcat.fullplate.utilities.Constants;
 import io.trunkcat.fullplate.utilities.GameFont;
 
@@ -49,18 +50,23 @@ public class CookGame extends Game {
     public void create() {
         viewport = new ScreenViewport();
         PallyFont = new GameFont("fonts/Pally-Regular.otf");
-        httpClient = new HTTPClient("http://192.168.1.8:8080/api");
+        httpClient = new HTTPClient("http://192.168.29.36:8080/api");
         player = new Player();
         preferences = Gdx.app.getPreferences("Full plate Preferences");
         skin = new Skin(Gdx.files.internal("cook-skin/0.5/skin.json"));
 
         String sessionToken = preferences.getString(Constants.PREF_KEY_SESSION_TOKEN);
-        if (sessionToken != null && !sessionToken.isEmpty()) {
-            httpClient.setAuthSessionToken(sessionToken);
-            setScreen(new LoadingScreen());
-        } else {
-            setScreen(new LoginScreen());
-        }
+
+        PlayerStats stats = new PlayerStats(1, 100, 1000);
+        player.data = new PlayerData(12, "dunks", stats);
+        setScreen(new LevelScreen());
+
+//        if (sessionToken != null && !sessionToken.isEmpty()) {
+//            httpClient.setAuthSessionToken(sessionToken);
+//            setScreen(new LoadingScreen());
+//        } else {
+//            setScreen(new LoginScreen());
+//        }
     }
 
     public static CookGame getInstance() {

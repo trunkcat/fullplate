@@ -41,6 +41,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import io.trunkcat.fullplate.CookGame;
@@ -206,7 +207,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         // TODO: SLightly update the width of each button to make it look better (hack).
         //  Fix this by actually fixing the padding on the source skin styles.
         bottomBar.layout();
-        for (Cell<?> children : bottomBar.getCells()) {
+        for (Cell<?> children : new Array.ArrayIterator<>(bottomBar.getCells())) {
             if (children.getActor() instanceof TextButton) {
                 children.width(children.getPrefWidth() + 30f);
             }

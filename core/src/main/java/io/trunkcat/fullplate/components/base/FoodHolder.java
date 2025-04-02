@@ -22,26 +22,23 @@
 
 package io.trunkcat.fullplate.components.base;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
-import com.badlogic.gdx.utils.Array;
-
-import java.util.HashMap;
 
 import io.trunkcat.fullplate.components.ItemID;
+import io.trunkcat.fullplate.utilities.TransformData;
 
 public abstract class FoodHolder extends Item {
-    private final Array<FoodRecipe.PartialIngredient> ingredients = new Array<>();
-    protected FoodRecipeManager recipeManager;
+    protected final CompositeFood compositeFood;
+    protected FoodCombinationsManager combinationsManager;
 
-    public FoodHolder(ItemID itemId, int level, FoodRecipeManager recipeManager) {
+    public FoodHolder(ItemID itemId, int level, FoodCombinationsManager combinationsManager) {
         super(itemId, level);
-        this.recipeManager = recipeManager;
+        this.combinationsManager = combinationsManager;
+        this.compositeFood = new CompositeFood(combinationsManager);
     }
 
     @Override
@@ -49,43 +46,58 @@ public abstract class FoodHolder extends Item {
         return loadTexture(itemId);
     }
 
-    // TODO: figure out drag
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+
+        // TODO: have safe areas for each holder, and pass the x and y of that area
+        alignCompositeFood();
+    }
+
+    private void alignCompositeFood() {
+        compositeFood.setPosition(getX(), getY());
+        compositeFood.setScale(getScaleX(), getScaleY());
+        compositeFood.setZIndex(getZIndex());
+    }
+
+    @Override
+    protected void setStage(Stage stage) {
+        super.setStage(stage);
+        if (stage != null) {
+            stage.addActor(compositeFood);
+        }
+    }
+
     @Override
     public DragAndDrop.Source getDragSource() {
         return new DragAndDrop.Source(this) {
             @Override
             public DragAndDrop.Payload dragStart(InputEvent event, float x, float y, int pointer) {
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
+
+                TransformData position = new TransformData(FoodHolder.this);
+                payload.setObject(position);
+
+                setZIndex(getStage().getActors().size + 1);
                 payload.setDragActor(FoodHolder.this);
-                Vector2 startPosition = new Vector2(
-                    FoodHolder.this.getX(),
-                    FoodHolder.this.getY()
-                );
-                payload.setObject(startPosition);
+
                 return payload;
             }
 
             @Override
             public void dragStop(InputEvent event, float x, float y, int pointer, DragAndDrop.Payload payload, DragAndDrop.Target target) {
                 super.dragStop(event, x, y, pointer, payload, target);
+
                 if (target == null || target.getActor() == null) {
-                    Vector2 startPosition = (Vector2) payload.getObject();
-                    FoodHolder.this.setPosition(startPosition.x, startPosition.y);
+                    TransformData startPosition = (TransformData) payload.getObject();
+                    startPosition.apply(payload.getDragActor());
+                    return;
                 }
+
                 // TODO: else, if its a customer...?
-                //  check orders, choose satisfying order's recipe, fulfill order
+                //  check orders, choose satisfying order's combination, fulfill order
             }
         };
-    }
-
-    @Override
-    public void draw(Batch batch, float parentAlpha) {
-        super.draw(batch, parentAlpha);
-
-        FoodRecipe recipe = recipeManager.getFirstMatchingRecipe(ingredients);
-        if (recipe != null) {
-            recipe.render(batch, ingredients, FoodHolder.this.getX(), FoodHolder.this.getY());
-        }
     }
 
     @Override
@@ -97,16 +109,16 @@ public abstract class FoodHolder extends Item {
                     return false;
                 }
                 Actor dragActor = payload.getDragActor();
-                if (!(dragActor instanceof Food)) {
-                    return false;
+
+                if (dragActor instanceof Food) {
+                    Food food = (Food) dragActor;
+                    return combinationsManager.canAddIngredient(
+                        compositeFood.getIngredients(),
+                        FoodCombination.PartialIngredient.from(food)
+                    );
                 }
-                Food food = (Food) dragActor;
-                Gdx.app.log("Food Holder", "Attempting to drop " + food.getItemId() + " into " + FoodHolder.this.itemId);
-                if (food.getCurrentState() != Food.State.PREPARED) {
-                    Gdx.app.log("Food Holder", "Food is not prepared");
-                    return false;
-                }
-                return recipeManager.canAddIngredient(ingredients, FoodHolder.toPartialIngredient(food));
+
+                return false;
             }
 
             @Override
@@ -115,28 +127,17 @@ public abstract class FoodHolder extends Item {
                     return;
                 }
                 Actor dragActor = payload.getDragActor();
-                if (!(dragActor instanceof Food)) {
-                    return;
+
+                if (dragActor instanceof Food) {
+                    Food food = (Food) dragActor;
+                    compositeFood.addIngredient(FoodCombination.PartialIngredient.from(food));
+                    dispatchStageEvent(new KitchenEvent.FoodConsumeEvent(
+                        food,
+                        source.getActor(),
+                        FoodHolder.this
+                    ));
                 }
-                Food food = (Food) dragActor;
-                ingredients.add(FoodHolder.toPartialIngredient(food));
-                Gdx.app.log("Food Holder", "Dropped " + food.getItemId() + " into " + FoodHolder.this.itemId);
-                food.remove();
-
-                Gdx.app.log("Food Holder", "Ingredients: ");
-                ingredients.forEach(item -> Gdx.app.log("Food Holder", "    " + item.getItemId()));
-
-                HashMap<ItemID, FoodRecipe> possibleRecipes = recipeManager.getPossibleRecipes(ingredients);
-                Gdx.app.log("Food Holder", "Possible recipes (" + possibleRecipes.size() + "): ");
-                possibleRecipes.forEach((item, recipe) -> Gdx.app.log("Food Holder", "    " + item.id));
-
-                FoodRecipe recipe = recipeManager.getFirstMatchingRecipe(ingredients);
-                Gdx.app.log("Food Holder", "Using recipe: " + recipe.getResultItemId());
             }
         };
-    }
-
-    static FoodRecipe.PartialIngredient toPartialIngredient(Food food) {
-        return new FoodRecipe.PartialIngredient(food.getItemId(), 1, food.getCurrentState());
     }
 }

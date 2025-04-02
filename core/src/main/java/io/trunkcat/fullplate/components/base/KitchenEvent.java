@@ -22,25 +22,31 @@
 
 package io.trunkcat.fullplate.components.base;
 
-import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Event;
 
-import java.util.HashMap;
+public class KitchenEvent extends Event {
+    public static class FoodConsumeEvent extends KitchenEvent {
+        private final Food food;
+        private final Actor provider;
+        private final Actor consumer;
 
-import io.trunkcat.fullplate.components.ItemID;
+        public FoodConsumeEvent(Food food, Actor provider, Actor consumer) {
+            this.food = food;
+            this.provider = provider;
+            this.consumer = consumer;
+        }
 
-public abstract class FoodRecipeRenderer {
-    protected Batch batch;
+        public Food getFood() {
+            return food;
+        }
 
-    protected FoodRecipeRenderer() {
+        public Actor getProvider() {
+            return provider;
+        }
+
+        public Actor getConsumer() {
+            return consumer;
+        }
     }
-
-    public void setBatch(Batch batch) {
-        this.batch = batch;
-    }
-
-    protected void draw(FoodRecipe.PartialIngredient item, float x, float y) {
-        batch.draw(Food.loadStateTexture(item.getItemId(), item.getState()), x, y);
-    }
-
-    abstract public void render(HashMap<ItemID, FoodRecipe.PartialIngredient> ingredients, float x, float y);
 }

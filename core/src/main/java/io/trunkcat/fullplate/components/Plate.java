@@ -28,66 +28,63 @@ import com.badlogic.gdx.utils.Array;
 import java.util.HashMap;
 
 import io.trunkcat.fullplate.components.base.Food;
+import io.trunkcat.fullplate.components.base.FoodCombination;
+import io.trunkcat.fullplate.components.base.FoodCombinationsManager;
 import io.trunkcat.fullplate.components.base.FoodHolder;
-import io.trunkcat.fullplate.components.base.FoodRecipe;
-import io.trunkcat.fullplate.components.base.FoodRecipeManager;
-import io.trunkcat.fullplate.components.base.FoodRecipeRenderer;
+import io.trunkcat.fullplate.components.base.IngredientsRenderer;
 
 public class Plate extends FoodHolder {
-    public Plate(int level) {
-        super(ItemID.PLATE, level, new FoodRecipeManager());
+    static FoodCombinationsManager COMBINATION_MANAGER = new FoodCombinationsManager();
 
-        FoodRecipeRenderer burgerRenderer = new FoodRecipeRenderer() {
+    static {
+        IngredientsRenderer burgerRenderer = new IngredientsRenderer() {
             @Override
-            public void render(HashMap<ItemID, FoodRecipe.PartialIngredient> ingredients, float x, float y) {
-                FoodRecipe.PartialIngredient burgerBun = ingredients.get(ItemID.BURGER_BUN);
+            public void render(HashMap<ItemID, FoodCombination.PartialIngredient> ingredients, float x, float y) {
+                FoodCombination.PartialIngredient burgerBun = ingredients.get(ItemID.BURGER_BUN);
                 if (burgerBun != null) {
                     draw(burgerBun, x, y);
                 } else {
                     return;
                 }
-                draw(burgerBun, x, y + 5);
+
+                FoodCombination.PartialIngredient patty = ingredients.get(ItemID.BURGER_PATTY);
+                if (patty != null) {
+                    y += 5;
+                    draw(patty, x, y);
+                }
+
+                FoodCombination.PartialIngredient tomato = ingredients.get(ItemID.TOMATO);
+                if (tomato != null) {
+                    y += 5;
+                    draw(tomato, x, y);
+                }
+
+                y += 5;
+                draw(burgerBun, x, y);
             }
         };
 
-        FoodRecipe simpleBurgerRecipe = new FoodRecipe(ItemID.SIMPLE_BURGER, burgerRenderer);
-        simpleBurgerRecipe.addIngredient(new FoodRecipe.Ingredient(ItemID.BURGER_BUN, 1));
-        simpleBurgerRecipe.addIngredient(new FoodRecipe.Ingredient(ItemID.BURGER_PATTY, 1, true, 1));
+        FoodCombination burger = new FoodCombination(ItemID.BURGER, Food.State.PREPARED, burgerRenderer)
+            .addIngredient(new FoodCombination.Ingredient(ItemID.BURGER_BUN, 1, Food.State.PREPARED))
+            .addIngredient(new FoodCombination.Ingredient(ItemID.BURGER_PATTY, 1, true, 1, Food.State.PREPARED))
+            .addIngredient(new FoodCombination.Ingredient(ItemID.LETTUCE, 1, false, 1, Food.State.PREPARED))
+            .addIngredient(new FoodCombination.Ingredient(ItemID.CHEESE, 1, false, 1, Food.State.PREPARED))
+            .addIngredient(new FoodCombination.Ingredient(ItemID.TOMATO, 1, false, 1, Food.State.PREPARED));
 
-        FoodRecipe cheeseBurgerRecipe = new FoodRecipe(ItemID.CHEESE_BURGER, burgerRenderer);
-        cheeseBurgerRecipe.addIngredient(new FoodRecipe.Ingredient(ItemID.BURGER_BUN, 1));
-        cheeseBurgerRecipe.addIngredient(new FoodRecipe.Ingredient(ItemID.BURGER_PATTY, 1, true, 1));
-        cheeseBurgerRecipe.addIngredient(new FoodRecipe.Ingredient(ItemID.CHEESE, 1, true, 1));
-        cheeseBurgerRecipe.addIngredient(new FoodRecipe.Ingredient(ItemID.LETTUCE, 2, false, 1));
+        COMBINATION_MANAGER.addCombination(burger);
+    }
 
-        FoodRecipe doubleCheeseBurgerRecipe = new FoodRecipe(ItemID.DOUBLE_CHEESE_BURGER, burgerRenderer);
-        doubleCheeseBurgerRecipe.addIngredient(new FoodRecipe.Ingredient(ItemID.BURGER_BUN, 1));
-        doubleCheeseBurgerRecipe.addIngredient(new FoodRecipe.Ingredient(ItemID.BURGER_PATTY, 1, true, 1));
-        doubleCheeseBurgerRecipe.addIngredient(new FoodRecipe.Ingredient(ItemID.CHEESE, 1, true, 2));
-        doubleCheeseBurgerRecipe.addIngredient(new FoodRecipe.Ingredient(ItemID.LETTUCE, 2, false, 1));
+    public Plate(int level) {
+        super(ItemID.PLATE, level, Plate.COMBINATION_MANAGER);
 
-        FoodRecipe veggieBurgerRecipe = new FoodRecipe(ItemID.VEGGIE_BURGER, burgerRenderer);
-        veggieBurgerRecipe.addIngredient(new FoodRecipe.Ingredient(ItemID.BURGER_BUN, 1));
-        veggieBurgerRecipe.addIngredient(new FoodRecipe.Ingredient(ItemID.LETTUCE, 1, false, 1));
-        veggieBurgerRecipe.addIngredient(new FoodRecipe.Ingredient(ItemID.TOMATO, 1, false, 1));
-        veggieBurgerRecipe.addIngredient(new FoodRecipe.Ingredient(ItemID.CHEESE, 1, false, 1));
-
-        this.recipeManager.addRecipe(simpleBurgerRecipe);
-        this.recipeManager.addRecipe(cheeseBurgerRecipe);
-        this.recipeManager.addRecipe(doubleCheeseBurgerRecipe);
-        this.recipeManager.addRecipe(veggieBurgerRecipe);
-
-        Array<FoodRecipe.PartialIngredient> items = new Array<>(new FoodRecipe.PartialIngredient[]{
-            new FoodRecipe.PartialIngredient(ItemID.BURGER_BUN, 1, Food.State.PREPARED),
-            new FoodRecipe.PartialIngredient(ItemID.BURGER_PATTY, 1, Food.State.PREPARED),
-            new FoodRecipe.PartialIngredient(ItemID.CHEESE, 1, Food.State.PREPARED),
-            new FoodRecipe.PartialIngredient(ItemID.LETTUCE, 1, Food.State.PREPARED),
+        Array<FoodCombination.PartialIngredient> items = new Array<>(new FoodCombination.PartialIngredient[]{
+            new FoodCombination.PartialIngredient(ItemID.BURGER_BUN, 1, Food.State.PREPARED),
+            new FoodCombination.PartialIngredient(ItemID.BURGER_PATTY, 1, Food.State.PREPARED),
         });
-        HashMap<ItemID, FoodRecipe> recipes = this.recipeManager.getPossibleRecipes(items);
-        for (FoodRecipe recipe : recipes.values()) {
-            Gdx.app.log("recipe manager", recipe.getResultItemId().id);
-            Gdx.app.log("recipe manager", String.valueOf(recipeManager.isSatisfied(items, recipe)));
-//            recipe.render(null, items, 10, 10);
+        HashMap<ItemID, FoodCombination> combinations = this.combinationsManager.findAllPossibleCombinations(items);
+        for (FoodCombination combination : combinations.values()) {
+            Gdx.app.log("combinations manager", combination.getResultItemId().id);
+            Gdx.app.log("combinations manager", String.valueOf(combinationsManager.isSatisfied(items, combination)));
         }
     }
 }

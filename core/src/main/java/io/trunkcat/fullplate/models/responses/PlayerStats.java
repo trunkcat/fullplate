@@ -27,6 +27,15 @@ public class PlayerStats {
     private int coins;
     private int experiencePoints;
 
+    public PlayerStats() {
+    }
+
+    public PlayerStats(int playerLevel, int coins, int experiencePoints) {
+        this.playerLevel = playerLevel;
+        this.coins = coins;
+        this.experiencePoints = experiencePoints;
+    }
+
     public int getPlayerLevel() {
         return playerLevel;
     }

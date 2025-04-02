@@ -30,7 +30,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
 import io.trunkcat.fullplate.models.PlayerData;
 import io.trunkcat.fullplate.network.ResponseHandler;
-import io.trunkcat.fullplate.screens.home.HomeScreen;
+import io.trunkcat.fullplate.screens.restaurant.LevelScreen;
 
 public class LoadingScreen extends Screen {
     public LoadingScreen() {
@@ -55,10 +55,9 @@ public class LoadingScreen extends Screen {
             public void success(PlayerData playerData) {
                 game.player.data = playerData;
                 Gdx.app.log("Load", "Logged in as " + game.player.data.getUsername());
-                game.setScreen(new HomeScreen());
-//                game.setScreen(new LevelScreen());
+//                game.setScreen(new HomeScreen());
+                game.setScreen(new LevelScreen());
             }
-
 
             public void failure(String message) {
                 loadStatusLabel.setText(message);

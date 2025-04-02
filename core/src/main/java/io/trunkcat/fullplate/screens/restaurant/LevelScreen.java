@@ -35,13 +35,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import io.trunkcat.fullplate.CookGame;
+import io.trunkcat.fullplate.components.BurgerBunTray;
 import io.trunkcat.fullplate.components.BurgerPattyTray;
+import io.trunkcat.fullplate.components.CuttingBoard;
+import io.trunkcat.fullplate.components.FryingPan;
 import io.trunkcat.fullplate.components.Plate;
-import io.trunkcat.fullplate.components.base.BurgerBunTray;
+import io.trunkcat.fullplate.components.TomatoBowl;
 import io.trunkcat.fullplate.components.base.Item;
 
 public class LevelScreen implements com.badlogic.gdx.Screen {
@@ -78,6 +82,8 @@ public class LevelScreen implements com.badlogic.gdx.Screen {
         tableImage.setWidth(viewport.getWorldWidth());
         tableImage.setHeight(viewport.getWorldWidth() * tableImageAspectRatio);
 //        levelStage.addActor(tableImage);
+
+        levelStage.setDebugAll(true);
 
         setupKitchen();
     }
@@ -178,7 +184,7 @@ public class LevelScreen implements com.badlogic.gdx.Screen {
     private Vector2 calculateTableSize(Table table) {
         Vector2 size = new Vector2();
         table.layout();
-        for (Cell<?> cell : table.getCells()) {
+        for (Cell<?> cell : new Array.ArrayIterable<>(table.getCells())) {
             size.x += cell.getPrefWidth();
             size.y += cell.getPrefHeight();
         }
@@ -195,8 +201,14 @@ public class LevelScreen implements com.badlogic.gdx.Screen {
         Plate plate1 = new Plate(1);
         addLevelActor(plate1, 500, 100);
 
-//        Plate plate2 = new Plate(1);
-//        addLevelActor(plate2, 700, 100);
+        FryingPan fryingPan1 = new FryingPan(1);
+        addLevelActor(fryingPan1, 700, 100);
+
+        TomatoBowl tomatoBowl = new TomatoBowl(1, 500);
+        addLevelActor(tomatoBowl, 900, 300);
+
+        CuttingBoard cuttingBoard1 = new CuttingBoard(1);
+        addLevelActor(cuttingBoard1, 900, 100);
     }
 
     private void addLevelActor(Item item, int x, int y) {
