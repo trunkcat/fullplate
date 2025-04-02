@@ -45,8 +45,13 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 import io.trunkcat.fullplate.CookGame;
 import io.trunkcat.fullplate.entities.PlaceData;
+import io.trunkcat.fullplate.models.PlayerData;
+import io.trunkcat.fullplate.models.responses.PlayerStats;
 
 
 public class HomeScreen implements com.badlogic.gdx.Screen {
@@ -55,6 +60,9 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
     private final Stage hudStage;
     private final Stage mapStage;
     private final MapGestureListener mapGestureHandler;
+
+    PlayerData[] playerData;
+
 
     public HomeScreen() {
         game = CookGame.getInstance();
@@ -112,6 +120,61 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                 new Vector2(1750, 1000))};
 
         setupMapPlaces(samplePlaces);
+
+        playerData = new PlayerData[]{
+            new PlayerData(
+                1,
+                "Sreeerag",
+                new PlayerStats(
+                    64,
+                    1000,
+                    15)
+            ),
+            new PlayerData(
+                2,
+                "Sidharth",
+                new PlayerStats(
+                    63,
+                    750,
+                    15
+                )
+            ),
+            new PlayerData(
+                3,
+                "Shivani",
+                new PlayerStats(
+                    62,
+                    3000,
+                    15)
+            ),
+            new PlayerData(
+                4,
+                "Sharun",
+                new PlayerStats(
+                    61,
+                    200,
+                    15
+                )
+            ),
+            new PlayerData(
+                5,
+                "Shahina",
+                new PlayerStats(
+                    59,
+                    500,
+                    15)
+            ),
+            new PlayerData(
+                6,
+                "You",
+                new PlayerStats(
+                    15,
+                    1200,
+                    15
+                )
+            ),
+            game.player.data,
+        };
     }
 
     @Override
@@ -192,6 +255,13 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
 
         Button leaderboardButton = new Button(game.skin, "leaderboard-button");
         rightElements.add(leaderboardButton).size(64, 64).right().padRight(15).pad(5);
+        leaderboardButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                showLeaderboardWindow();
+                ;
+            }
+        });
         Button notificationsButton = new Button(game.skin, "notifications-button");
         rightElements.add(notificationsButton).size(64, 64).right().padRight(15).pad(5);
         Button settingsButton = new Button(game.skin, "settings-button");
@@ -461,5 +531,83 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
 
         setWindowContent(window, content);
         hudStage.addActor(window);
+    }
+
+    private void showLeaderboardWindow() {
+        // Sort by coins in descending order
+        Arrays.sort(playerData, Comparator.comparingInt(p -> -p.getStats().getPlayerLevel()));
+
+        // Create Window
+        Window leaderboard = createWindow();
+        Table content = new Table();
+        content.defaults().pad(10).fillX();
+
+        content.add(new Label("Leaderboard", game.skin, "h1")).left().row();
+
+//        addLeaderboardHeader(content);
+
+        Table leaderboardTable = new Table();
+        leaderboardTable.defaults().pad(10).fillX();
+
+        boolean userInLeaderboard = false;
+
+        for (int i = 0; i < Math.min(5, playerData.length); i++) {
+            leaderboardTable.add(createPlayerRow(i + 1, playerData[i])).fillX().row();
+            if (playerData[i].getId() == game.player.data.getId()) userInLeaderboard = true;
+        }
+
+        if (!userInLeaderboard) {
+            leaderboardTable.add(createPlayerRow(getPlayerRank(), game.player.data)).fillX().row();
+        }
+
+        ScrollPane scrollPane = new ScrollPane(leaderboardTable, game.skin);
+        scrollPane.setFadeScrollBars(false);
+        content.add(scrollPane).expandX().row();
+
+        TextButton closeButton = new TextButton("Close", game.skin);
+        closeButton.addListener(event -> {
+            leaderboard.remove();
+            return true;
+        });
+
+        content.add(closeButton).uniform().center().padTop(20);
+
+        setWindowContent(leaderboard, content);
+        hudStage.addActor(leaderboard);
+    }
+
+    private void addLeaderboardHeader(Table table) {
+        Label rankLabel = new Label("#", game.skin, "h1");
+        Label nameLabel = new Label("nickname", game.skin, "h1");
+        Label levelLabel = new Label("player level", game.skin, "h1");
+
+        table.add(rankLabel).left();
+        table.add(nameLabel).center();
+        table.add(levelLabel).right();
+        table.row();
+    }
+
+    private Table createPlayerRow(int rank, PlayerData player) {
+        Table row = new Table();
+        row.defaults().pad(10).fillX();
+
+        Label rankLabel = new Label(String.valueOf(rank), game.skin);
+        Label nameLabel = new Label(player.getUsername(), game.skin);
+        Label levelLabel = new Label("LVL " + player.getStats().getPlayerLevel(), game.skin);
+
+        row.add(rankLabel).width(50).left();
+        row.add(nameLabel).expandX().left();
+        row.add(levelLabel).width(100).right();
+
+        return row;
+    }
+
+    private int getPlayerRank() {
+        for (int i = 0; i < playerData.length; i++) {
+            if (playerData[i].getId() == game.player.data.getId()) {
+                return i + 1;
+            }
+        }
+        return playerData.length;
     }
 }
