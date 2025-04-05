@@ -29,10 +29,9 @@ public class PlaceData {
     private PlaceType type;
     private String name;
     private String description;
-    private String info;
-    private Integer cost;
-    private int levelCount;
-    private int requiredLevel;
+    private final Integer cost;
+    private final int levelCount;
+    private final int requiredLevel;
     private boolean locked;
     private Vector2 position;
 

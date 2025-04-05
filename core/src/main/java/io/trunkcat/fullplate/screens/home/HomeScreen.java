@@ -24,6 +24,7 @@ package io.trunkcat.fullplate.screens.home;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -38,6 +39,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
@@ -52,6 +54,7 @@ import io.trunkcat.fullplate.CookGame;
 import io.trunkcat.fullplate.entities.PlaceData;
 import io.trunkcat.fullplate.models.PlayerData;
 import io.trunkcat.fullplate.models.responses.PlayerStats;
+import settings.GameSettings;
 
 
 public class HomeScreen implements com.badlogic.gdx.Screen {
@@ -62,6 +65,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
     private final MapGestureListener mapGestureHandler;
 
     PlayerData[] playerData;
+    GameSettings gameSettings = new GameSettings();
 
 
     public HomeScreen() {
@@ -259,7 +263,6 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 showLeaderboardWindow();
-                ;
             }
         });
         Button notificationsButton = new Button(game.skin, "notifications-button");
@@ -307,8 +310,266 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         hudStage.addActor(mainTable);
     }
 
+    private void setupMapPlaces(PlaceData[] places) {
+        Group placesGroup = new Group();
+
+        for (PlaceData placeData : places) {
+            placesGroup.addActor(new PlacePointer(placeData));
+        }
+
+        mapStage.addActor(placesGroup);
+    }
+
+    private Window createWindow() {
+        Window window = new Window("", game.skin);
+        window.setMovable(false);
+        window.setModal(true);
+        window.setKeepWithinStage(true);
+        window.setResizable(false);
+        return window;
+    }
+
+    private void setWindowContent(Window window, Table content) {
+        Vector2 tableSize = calculateTableSize(content);
+        float windowWidth = tableSize.x + window.getStyle().background.getMinWidth() + 100;
+        float windowHeight = tableSize.y + window.getStyle().background.getMinHeight() + 100;
+        window.setSize(windowWidth, windowHeight);
+        window.setPosition(Gdx.graphics.getWidth() / 2f - windowWidth / 2f, Gdx.graphics.getHeight() / 2f - windowHeight / 2f);
+        window.add(content).expand().fill();
+    }
+
+    private Vector2 calculateTableSize(Table table) {
+        Vector2 size = new Vector2();
+        table.layout();
+        for (Cell<?> cell : table.getCells()) {
+            size.x += cell.getPrefWidth();
+            size.y += cell.getPrefHeight();
+        }
+        return size;
+    }
+
+    // TODO: Complete settings window
+    private void showSettingsWindow() {
+        Window window = createWindow();
+        Table content = new Table();
+        content.defaults().pad(10).expandX();
+
+        //TODO: Load settings if player has a save (preferences)
+
+        Label heading = new Label("Settings", game.skin, "h1");
+        content.add(heading).expandX().left();
+        content.row();
+
+        Label audioLabel = new Label("Audio", game.skin, "h2");
+        content.add(audioLabel).left().padBottom(10);
+        content.row();
+
+        Table audioControls = new Table();
+        audioControls.left();
+        showAudioControls(audioControls);
+        content.add(audioControls).left();
+        content.row();
+
+        Label accountLabel = new Label("Account", game.skin, "h2");
+        Label accountInfo = new Label("Currently logged in as " + game.player.data.getUsername(), game.skin);
+
+        TextButton logoutButton = new TextButton("Log Out", game.skin);
+        exitConfirmation(logoutButton);
+
+        content.add(accountLabel).left();
+        content.row();
+        content.add(accountInfo).left();
+        content.row();
+        content.add(logoutButton).left();
+        content.row();
+
+        TextButton closeButton = new TextButton("Close", game.skin);
+        closeButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                getWindow(actor).remove();
+            }
+        });
+        content.add(closeButton).pad(10);
+
+        setWindowContent(window, content);
+        hudStage.addActor(window);
+    }
+
+    private Window getWindow(Actor actor) {
+        while (actor != null) {
+            if (actor instanceof Window) return (Window) actor;
+            actor = actor.getParent();
+        }
+        return null;
+    }
+
+
+    private void exitConfirmation(TextButton logoutButton) {
+        logoutButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Window confirmation = createWindow();
+                confirmation.pad(20); // Add inner padding for nice spacing
+
+                Table exitTable = new Table();
+                exitTable.defaults().pad(10);
+
+                // Message label
+                Label messageLabel = new Label("Are you sure you want to leave?", game.skin);
+                messageLabel.setAlignment(Align.center);
+                exitTable.add(messageLabel).colspan(2).center().padBottom(20).row();
+
+                // Accept & Cancel buttons
+                TextButton acceptButton = new TextButton("Accept", game.skin);
+                TextButton cancelButton = new TextButton("Cancel", game.skin);
+
+                acceptButton.addListener(new ChangeListener() {
+                    @Override
+                    public void changed(ChangeEvent event, Actor actor) {
+                        game.player.logout();
+                    }
+                });
+
+                cancelButton.addListener(new ChangeListener() {
+                    @Override
+                    public void changed(ChangeEvent event, Actor actor) {
+                        getWindow(actor).remove();
+                    }
+                });
+
+                exitTable.add(acceptButton).padRight(10).uniformX();
+                exitTable.add(cancelButton).uniformX();
+
+                // Set and show window
+                setWindowContent(confirmation, exitTable);
+                confirmation.pack();
+                confirmation.setPosition(
+                    (hudStage.getWidth() - confirmation.getWidth()) / 2,
+                    (hudStage.getHeight() - confirmation.getHeight()) / 2
+                );
+
+                hudStage.addActor(confirmation);
+            }
+        });
+    }
+
+
+    private void showAudioControls(Table audioControls) {
+        Preferences preferences = gameSettings.getPreferences();
+
+        float musicVolume = preferences.getFloat("musicVolume");
+        float soundVolume = preferences.getFloat("soundVolume");
+
+        Label musicLabel = new Label("MUSIC", game.skin);
+        Label soundLabel = new Label("SFX", game.skin);
+
+        Slider musicSlider = new Slider(0.0f, 1.0f, 0.1f, false, game.skin);
+        musicSlider.setScale(2);
+
+        Slider soundSlider = new Slider(0.0f, 1.0f, 0.1f, false, game.skin);
+        soundSlider.setScale(2);
+
+        Button muteButton = new Button(game.skin, "volume-button");
+        muteButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                gameSettings.setMute(!gameSettings.isMute());
+            }
+        });
+
+        audioControls.add(musicLabel).expandX().padRight(50).width(70);
+        audioControls.add(musicSlider).expandX().width(150);
+        audioControls.row().left().pad(15);
+        audioControls.add(soundLabel).expandX().padRight(50).width(70);
+        audioControls.add(soundSlider).expandX().width(150).pad(15);
+        audioControls.row().left();
+        audioControls.add(muteButton).expandX().size(64).pad(15);
+        audioControls.row().left();
+    }
+
+    private void showLeaderboardWindow() {
+        // Sort by coins in descending order
+        Arrays.sort(playerData, Comparator.comparingInt(p -> -p.getStats().getPlayerLevel()));
+
+        // Create Window
+        Window leaderboard = createWindow();
+        Table content = new Table();
+        content.defaults().pad(10).fillX();
+
+        content.add(new Label("Leaderboard", game.skin, "h1")).left().row();
+
+//        addLeaderboardHeader(content);
+
+        Table leaderboardTable = new Table();
+        leaderboardTable.defaults().pad(10).fillX();
+
+        boolean userInLeaderboard = false;
+
+        for (int i = 0; i < Math.min(5, playerData.length); i++) {
+            leaderboardTable.add(createPlayerRow(i + 1, playerData[i])).fillX().row();
+            if (playerData[i].getId() == game.player.data.getId()) userInLeaderboard = true;
+        }
+
+        if (!userInLeaderboard) {
+            leaderboardTable.add(createPlayerRow(getPlayerRank(), game.player.data)).fillX().row();
+        }
+
+        ScrollPane scrollPane = new ScrollPane(leaderboardTable, game.skin);
+        scrollPane.setFadeScrollBars(false);
+        content.add(scrollPane).expandX().row();
+
+        TextButton closeButton = new TextButton("Close", game.skin);
+        closeButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                getWindow(actor).remove();
+            }
+        });
+
+        content.add(closeButton).uniform().center().padTop(20);
+
+        setWindowContent(leaderboard, content);
+        hudStage.addActor(leaderboard);
+    }
+
+    private void addLeaderboardHeader(Table table) {
+        Label rankLabel = new Label("#", game.skin, "h1");
+        Label nameLabel = new Label("nickname", game.skin, "h1");
+        Label levelLabel = new Label("player level", game.skin, "h1");
+
+        table.add(rankLabel).left();
+        table.add(nameLabel).center();
+        table.add(levelLabel).right();
+        table.row();
+    }
+
+    private Table createPlayerRow(int rank, PlayerData player) {
+        Table row = new Table();
+        row.defaults().pad(10).fillX();
+
+        Label rankLabel = new Label(String.valueOf(rank), game.skin);
+        Label nameLabel = new Label(player.getUsername(), game.skin);
+        Label levelLabel = new Label("LVL " + player.getStats().getPlayerLevel(), game.skin);
+
+        row.add(rankLabel).width(50).left();
+        row.add(nameLabel).expandX().left();
+        row.add(levelLabel).width(100).right();
+
+        return row;
+    }
+
+    private int getPlayerRank() {
+        for (int i = 0; i < playerData.length; i++) {
+            if (playerData[i].getId() == game.player.data.getId()) {
+                return i + 1;
+            }
+        }
+        return playerData.length;
+    }
+
     class PlacePointer extends Button {
-        private PlaceData placeData;
+        private final PlaceData placeData;
 
         public PlacePointer(PlaceData placeData) {
             this.placeData = placeData;
@@ -334,14 +595,14 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                     closeButton.addListener(new ChangeListener() {
                         @Override
                         public void changed(ChangeEvent event, Actor actor) {
-                            window.remove();
+                            getWindow(actor).remove();
                         }
                     });
 
                     TextButton buyButton = new TextButton("Buy", game.skin);
                     buyButton.addListener(new ChangeListener() {
+                        final boolean unlockable = game.player.data.getStats().getPlayerLevel() >= placeData.getRequiredLevel();
                         private boolean errorLabelAdded = false;
-                        boolean unlockable = game.player.data.getStats().getPlayerLevel() >= placeData.getRequiredLevel();
 
                         @Override
                         public void changed(ChangeEvent event, Actor actor) {
@@ -356,7 +617,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                                     window.remove();
                                 } else {
                                     if (!errorLabelAdded) {
-                                        Label neededMoney = new Label("You need $" + (int) (placeData.getCost() - playerMoney) + "!", game.skin, "h1");
+                                        Label neededMoney = new Label("You need $" + (placeData.getCost() - playerMoney) + "!", game.skin, "h1");
                                         content.add(neededMoney).expandX().uniform();
                                         content.row();
                                         errorLabelAdded = true;
@@ -415,7 +676,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                             closeButton.addListener(new ChangeListener() {
                                 @Override
                                 public void changed(ChangeEvent event, Actor actor) {
-                                    levelWindow.remove();
+                                    getWindow(actor).remove();
                                 }
                             });
 
@@ -459,155 +720,5 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
             setBounds(placeData.getPosition().x, placeData.getPosition().y, 100, 100);
             setOrigin(Align.center);
         }
-    }
-
-    private void setupMapPlaces(PlaceData[] places) {
-        Group placesGroup = new Group();
-
-        for (PlaceData placeData : places) {
-            placesGroup.addActor(new PlacePointer(placeData));
-        }
-
-        mapStage.addActor(placesGroup);
-    }
-
-    private Window createWindow() {
-        Window window = new Window("", game.skin);
-        window.setMovable(false);
-        window.setModal(true);
-        window.setKeepWithinStage(true);
-        window.setResizable(false);
-        return window;
-    }
-
-    private void setWindowContent(Window window, Table content) {
-        Vector2 tableSize = calculateTableSize(content);
-        float windowWidth = tableSize.x + window.getStyle().background.getMinWidth() + 100;
-        float windowHeight = tableSize.y + window.getStyle().background.getMinHeight() + 100;
-        window.setSize(windowWidth, windowHeight);
-        window.setPosition(Gdx.graphics.getWidth() / 2f - windowWidth / 2f, Gdx.graphics.getHeight() / 2f - windowHeight / 2f);
-        window.add(content).expand().fill();
-    }
-
-    private Vector2 calculateTableSize(Table table) {
-        Vector2 size = new Vector2();
-        table.layout();
-        for (Cell<?> cell : table.getCells()) {
-            size.x += cell.getPrefWidth();
-            size.y += cell.getPrefHeight();
-        }
-        return size;
-    }
-
-    // TODO: Complete settings window
-    private void showSettingsWindow() {
-        Window window = createWindow();
-        Table content = new Table();
-        content.defaults().pad(10).fillX();
-
-        Label heading = new Label("Settings", game.skin, "h1");
-        content.add(heading).expandX().left();
-        content.row();
-
-        Label audioLabel = new Label("Audio", game.skin, "h2");
-        content.add(audioLabel).expandX().left();
-        content.row();
-
-        Label accountLabel = new Label("Account", game.skin, "h2");
-        Label accountInfo = new Label("Currently logged in as " + game.player.data.getUsername(), game.skin);
-        content.add(accountLabel).left();
-        content.row();
-        content.add(accountInfo).left();
-        content.row();
-
-        TextButton closeButton = new TextButton("Close", game.skin);
-        closeButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                window.remove();
-            }
-        });
-        content.add(closeButton).pad(10);
-
-        setWindowContent(window, content);
-        hudStage.addActor(window);
-    }
-
-    private void showLeaderboardWindow() {
-        // Sort by coins in descending order
-        Arrays.sort(playerData, Comparator.comparingInt(p -> -p.getStats().getPlayerLevel()));
-
-        // Create Window
-        Window leaderboard = createWindow();
-        Table content = new Table();
-        content.defaults().pad(10).fillX();
-
-        content.add(new Label("Leaderboard", game.skin, "h1")).left().row();
-
-//        addLeaderboardHeader(content);
-
-        Table leaderboardTable = new Table();
-        leaderboardTable.defaults().pad(10).fillX();
-
-        boolean userInLeaderboard = false;
-
-        for (int i = 0; i < Math.min(5, playerData.length); i++) {
-            leaderboardTable.add(createPlayerRow(i + 1, playerData[i])).fillX().row();
-            if (playerData[i].getId() == game.player.data.getId()) userInLeaderboard = true;
-        }
-
-        if (!userInLeaderboard) {
-            leaderboardTable.add(createPlayerRow(getPlayerRank(), game.player.data)).fillX().row();
-        }
-
-        ScrollPane scrollPane = new ScrollPane(leaderboardTable, game.skin);
-        scrollPane.setFadeScrollBars(false);
-        content.add(scrollPane).expandX().row();
-
-        TextButton closeButton = new TextButton("Close", game.skin);
-        closeButton.addListener(event -> {
-            leaderboard.remove();
-            return true;
-        });
-
-        content.add(closeButton).uniform().center().padTop(20);
-
-        setWindowContent(leaderboard, content);
-        hudStage.addActor(leaderboard);
-    }
-
-    private void addLeaderboardHeader(Table table) {
-        Label rankLabel = new Label("#", game.skin, "h1");
-        Label nameLabel = new Label("nickname", game.skin, "h1");
-        Label levelLabel = new Label("player level", game.skin, "h1");
-
-        table.add(rankLabel).left();
-        table.add(nameLabel).center();
-        table.add(levelLabel).right();
-        table.row();
-    }
-
-    private Table createPlayerRow(int rank, PlayerData player) {
-        Table row = new Table();
-        row.defaults().pad(10).fillX();
-
-        Label rankLabel = new Label(String.valueOf(rank), game.skin);
-        Label nameLabel = new Label(player.getUsername(), game.skin);
-        Label levelLabel = new Label("LVL " + player.getStats().getPlayerLevel(), game.skin);
-
-        row.add(rankLabel).width(50).left();
-        row.add(nameLabel).expandX().left();
-        row.add(levelLabel).width(100).right();
-
-        return row;
-    }
-
-    private int getPlayerRank() {
-        for (int i = 0; i < playerData.length; i++) {
-            if (playerData[i].getId() == game.player.data.getId()) {
-                return i + 1;
-            }
-        }
-        return playerData.length;
     }
 }
