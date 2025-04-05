@@ -22,6 +22,7 @@
 
 package io.trunkcat.fullplate.components.base;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 
 import java.util.HashMap;
@@ -38,9 +39,87 @@ public abstract class IngredientsRenderer {
         this.batch = batch;
     }
 
-    protected void draw(FoodCombination.PartialIngredient item, float x, float y) {
-        batch.draw(Food.loadTexture(item.getItemId(), item.getState().value), x, y);
+    public static class Rect {
+        public float x;
+        public float y;
+        public float right;
+        public float left;
+        public float top;
+        public float bottom;
+
+        public Rect(float x, float y, float right, float left, float top, float bottom) {
+            this.x = x;
+            this.y = y;
+            this.right = right;
+            this.left = left;
+            this.top = top;
+            this.bottom = bottom;
+        }
+
+        public Rect(float x, float y, float width, float height) {
+            this(x, y, x + width, x, y + height, y);
+        }
+
+        public float getWidth() {
+            return Math.abs(right - left);
+        }
+
+        public float getHeight() {
+            return Math.abs(top - bottom);
+        }
+
+        @Override
+        public String toString() {
+            return "Rect{" +
+                "x=" + x +
+                ", y=" + y +
+                ", right=" + right +
+                ", left=" + left +
+                ", top=" + top +
+                ", bottom=" + bottom +
+                ", width=" + getWidth() +
+                ", height=" + getHeight() +
+                '}';
+        }
     }
 
-    abstract public void render(HashMap<ItemID, FoodCombination.PartialIngredient> ingredients, float x, float y);
+    protected void draw(Rect rect, FoodCombination.PartialIngredient item, float relativeX, float relativeY) {
+        Texture texture = Food.loadTexture(item.getItemId(), item.getState().value);
+
+        if (texture != null) {
+            float textureWidth = texture.getWidth();
+            float textureHeight = texture.getHeight();
+
+            // TODO: include composite food scale as well
+
+            // bounds of the item in world terms
+            float left = rect.x + relativeX;
+            float right = left + textureWidth;
+            float bottom = rect.y + relativeY;
+            float top = bottom + textureHeight;
+
+            if (right > rect.right) {
+                rect.right = right;
+            }
+            if (left < rect.left) {
+                rect.left = left;
+            }
+            if (top > rect.top) {
+                rect.top = top;
+            }
+            if (bottom < rect.bottom) {
+                rect.bottom = bottom;
+            }
+
+            batch.draw(texture, rect.x + relativeX, rect.y + relativeY);
+        }
+    }
+
+    public Rect render(HashMap<ItemID, FoodCombination.PartialIngredient> ingredients, float worldX, float worldY) {
+        if (batch == null) {
+            throw new IllegalStateException("Batch is not set");
+        }
+
+        return new Rect(worldX, worldY, 0, 0);
+    }
 }

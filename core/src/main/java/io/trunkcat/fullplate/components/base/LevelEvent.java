@@ -20,18 +20,13 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.components;
+package io.trunkcat.fullplate.components.base;
 
-import io.trunkcat.fullplate.components.base.Item;
-import io.trunkcat.fullplate.components.base.ItemStore;
+import com.badlogic.gdx.scenes.scene2d.Event;
 
-public class BurgerPattyTray extends ItemStore {
-    public BurgerPattyTray(int level, int initialStock) {
-        super(ItemID.BURGER_PATTY_TRAY, level, ItemID.BURGER_PATTY, initialStock);
-    }
-
-    protected Item produceItem() {
-        // TODO: change this level to the product's level. (get from player data)
-        return new BurgerPatty(level);
+public class LevelEvent extends Event {
+    public static class LevelCompletedEvent extends LevelEvent {
+        public LevelCompletedEvent() {
+        }
     }
 }

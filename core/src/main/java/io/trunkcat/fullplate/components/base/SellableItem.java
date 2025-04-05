@@ -29,13 +29,10 @@ public abstract class SellableItem extends Item {
 
     public SellableItem(ItemID itemId, int level) {
         super(itemId, level);
+        this.cost = itemId.getCost();
     }
 
     public int getCost() {
         return cost;
-    }
-
-    public void setCost(int cost) {
-        this.cost = cost;
     }
 }

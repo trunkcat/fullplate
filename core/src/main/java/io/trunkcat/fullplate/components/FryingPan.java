@@ -40,16 +40,22 @@ public class FryingPan extends FoodCooker {
     static {
         IngredientsRenderer fryingPanRenderer = new IngredientsRenderer() {
             @Override
-            public void render(HashMap<ItemID, FoodCombination.PartialIngredient> ingredients, float x, float y) {
+            public Rect render(HashMap<ItemID, FoodCombination.PartialIngredient> ingredients, float worldX, float worldY) {
+                Rect rect = super.render(ingredients, worldX, worldY);
+
+                float x = 0, y = 0;
+
                 FoodCombination.PartialIngredient oil = ingredients.get(ItemID.OLIVE_OIL);
                 if (oil != null) {
-                    draw(oil, x, y);
+                    draw(rect, oil, x, y);
                 }
                 FoodCombination.PartialIngredient burgerPatty = ingredients.get(ItemID.BURGER_PATTY);
                 if (burgerPatty != null) {
                     y += 5;
-                    draw(burgerPatty, x, y);
+                    draw(rect, burgerPatty, x, y);
                 }
+
+                return rect;
             }
         };
 
@@ -59,8 +65,7 @@ public class FryingPan extends FoodCooker {
         // the very last item is required.
 
         FoodCombination friedBurgerPatty = new FoodCombination(ItemID.BURGER_PATTY, Food.State.PREPARED, fryingPanRenderer)
-            .addIngredient(new FoodCombination.Ingredient(ItemID.BURGER_PATTY, 1, Food.State.UNPREPARED));
-        friedBurgerPatty.setCookingTime(10f);
+            .addIngredient(new FoodCombination.Ingredient(ItemID.BURGER_PATTY, 1, Food.State.UNPREPARED, 10f));
 
         COMBINATION_MANAGER.addCombination(friedBurgerPatty);
     }

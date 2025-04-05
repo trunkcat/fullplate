@@ -20,18 +20,34 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.components;
+package io.trunkcat.fullplate.utilities;
 
-import io.trunkcat.fullplate.components.base.Item;
-import io.trunkcat.fullplate.components.base.ItemStore;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 
-public class BurgerPattyTray extends ItemStore {
-    public BurgerPattyTray(int level, int initialStock) {
-        super(ItemID.BURGER_PATTY_TRAY, level, ItemID.BURGER_PATTY, initialStock);
+public class Bounds {
+    public float x;
+    public float y;
+    public float width;
+    public float height;
+
+    public Bounds(float x, float y, float width, float height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
     }
 
-    protected Item produceItem() {
-        // TODO: change this level to the product's level. (get from player data)
-        return new BurgerPatty(level);
+    public Bounds(Actor actor) {
+        this(
+            actor.getX(),
+            actor.getY(),
+            actor.getWidth(),
+            actor.getHeight()
+        );
+    }
+
+    public void apply(Actor actor) {
+        actor.setPosition(x, y);
+        actor.setSize(width, height);
     }
 }

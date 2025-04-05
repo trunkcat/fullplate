@@ -26,24 +26,24 @@ package io.trunkcat.fullplate.components;
 public enum ItemID {
     COMPOSITE_FOOD("composite-food", Type._INTERNAL),
 
-    FRYING_PAN("frying-pan", Type.FOOD_COOKER),
-    CUTTING_BOARD("cutting-board", Type.FOOD_COOKER),
-
     BURGER("burger", Type.COMBINATION),
 
-    BURGER_BUN("burger-bun", Type.FOOD),
+    BURGER_BUN("burger-bun", Type.FOOD, 2),
+    CHEESE("cheese", Type.FOOD, 1),
+    LETTUCE("lettuce", Type.FOOD, 1),
+    TOMATO("tomato", Type.FOOD, 1),
+
+    OLIVE_OIL("olive-oil", Type.COOKABLE_FOOD, 1),
+    BURGER_PATTY("burger-patty", Type.COOKABLE_FOOD, 2),
+
     BURGER_BUN_TRAY("burger-bun-tray", Type.ITEM_STORE),
-
-    OLIVE_OIL("olive-oil", Type.COOKABLE_FOOD),
-    BURGER_PATTY("burger-patty", Type.COOKABLE_FOOD),
     BURGER_PATTY_TRAY("burger-patty-tray", Type.ITEM_STORE),
-
-    CHEESE("cheese", Type.FOOD),
-    LETTUCE("lettuce", Type.FOOD),
-    TOMATO("tomato", Type.FOOD),
     TOMATO_BOWL("tomato-bowl", Type.ITEM_STORE),
 
-    PLATE("plate-2", Type.FOOD_HOLDER);
+    PLATE("plate-2", Type.FOOD_HOLDER),
+
+    FRYING_PAN("frying-pan", Type.FOOD_COOKER),
+    CUTTING_BOARD("cutting-board", Type.FOOD_COOKER);
 
     public enum Type {
         _INTERNAL,
@@ -55,12 +55,31 @@ public enum ItemID {
         FOOD_COOKER
     }
 
-    public final String id;
-    public final Type type;
+    private final String id;
+    private final Type type;
+    private final int cost;
+
+    ItemID(String itemId, Type type, int cost) {
+        this.id = itemId;
+        this.type = type;
+        this.cost = cost;
+    }
 
     ItemID(String itemId, Type type) {
         this.id = itemId;
         this.type = type;
+        this.cost = 0;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public int getCost() {
+        return cost;
+    }
 }

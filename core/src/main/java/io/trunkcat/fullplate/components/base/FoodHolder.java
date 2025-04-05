@@ -31,6 +31,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import io.trunkcat.fullplate.components.ItemID;
 import io.trunkcat.fullplate.utilities.TransformData;
 
+// TODO: make servable food holder!
 public abstract class FoodHolder extends Item {
     protected final CompositeFood compositeFood;
     protected FoodCombinationsManager combinationsManager;
@@ -65,6 +66,9 @@ public abstract class FoodHolder extends Item {
         super.setStage(stage);
         if (stage != null) {
             stage.addActor(compositeFood);
+        } else if (compositeFood != null) {
+            // remove the composite food assigned with this holder once this holder is removed.
+            compositeFood.remove(); // TODO: make them groups
         }
     }
 

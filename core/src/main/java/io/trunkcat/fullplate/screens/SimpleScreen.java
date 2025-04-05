@@ -28,14 +28,11 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
-import io.trunkcat.fullplate.CookGame;
-
-public class Screen implements com.badlogic.gdx.Screen {
-    final protected CookGame game;
+public class SimpleScreen extends BaseScreen {
     final protected Stage stage;
 
-    protected Screen() {
-        game = CookGame.getInstance();
+    protected SimpleScreen(ScreenID screenID) {
+        super(screenID);
         stage = new Stage(game.viewport);
     }
 
@@ -64,21 +61,6 @@ public class Screen implements com.badlogic.gdx.Screen {
                 runnable.run();
             }
         });
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
     }
 
     @Override

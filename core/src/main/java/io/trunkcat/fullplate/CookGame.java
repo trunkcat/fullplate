@@ -25,14 +25,18 @@ package io.trunkcat.fullplate;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import io.trunkcat.fullplate.components.common.Debug;
 import io.trunkcat.fullplate.entities.Player;
 import io.trunkcat.fullplate.models.PlayerData;
 import io.trunkcat.fullplate.models.responses.PlayerStats;
 import io.trunkcat.fullplate.network.HTTPClient;
+import io.trunkcat.fullplate.screens.BaseScreen;
+import io.trunkcat.fullplate.screens.ScreenID;
 import io.trunkcat.fullplate.screens.restaurant.LevelScreen;
 import io.trunkcat.fullplate.utilities.Constants;
 import io.trunkcat.fullplate.utilities.GameFont;
@@ -43,6 +47,8 @@ public class CookGame extends Game {
     public HTTPClient httpClient;
     public Player player;
     public Preferences preferences;
+    private ScreenID currentScreen = ScreenID.UNKNOWN;
+    public Debug debug;
 
     public Skin skin;
 
@@ -54,7 +60,7 @@ public class CookGame extends Game {
         player = new Player();
         preferences = Gdx.app.getPreferences("Full plate Preferences");
         skin = new Skin(Gdx.files.internal("cook-skin/0.5/skin.json"));
-
+        debug = new Debug();
         String sessionToken = preferences.getString(Constants.PREF_KEY_SESSION_TOKEN);
 
         PlayerStats stats = new PlayerStats(1, 100, 1000);
@@ -69,7 +75,28 @@ public class CookGame extends Game {
 //        }
     }
 
+    @Override
+    public void setScreen(Screen screen) {
+        super.setScreen(screen);
+
+        if (screen instanceof BaseScreen) {
+            currentScreen = ((BaseScreen) screen).getScreenID();
+        } else {
+            currentScreen = ScreenID.UNKNOWN;
+        }
+    }
+
+    public ScreenID getCurrentScreen() {
+        return currentScreen;
+    }
+
     public static CookGame getInstance() {
         return (CookGame) Gdx.app.getApplicationListener();
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        debug.dispose();
     }
 }

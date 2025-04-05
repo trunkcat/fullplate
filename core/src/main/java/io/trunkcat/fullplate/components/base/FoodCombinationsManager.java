@@ -25,10 +25,7 @@ package io.trunkcat.fullplate.components.base;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import io.trunkcat.fullplate.components.ItemID;
 
@@ -36,6 +33,10 @@ public class FoodCombinationsManager {
     private final HashMap<ItemID, FoodCombination> combinations = new HashMap<>();
 
     public FoodCombinationsManager() {
+    }
+
+    public HashMap<ItemID, FoodCombination> getCombinations() {
+        return combinations;
     }
 
     public void addCombination(FoodCombination combination) {
@@ -93,7 +94,8 @@ public class FoodCombinationsManager {
     }
 
 
-    public static HashMap<Integer, HashMap<ItemID, FoodCombination.PartialIngredient>> getItemsByPriority(FoodCombination combination, Array<FoodCombination.PartialIngredient> ingredientItems,
+    public static HashMap<Integer, HashMap<ItemID, FoodCombination.PartialIngredient>> getItemsByPriority(FoodCombination combination,
+                                                                                                          Array<FoodCombination.PartialIngredient> ingredientItems,
                                                                                                           HashMap<ItemID, Integer> ingredientQuantities) {
         HashMap<Integer, HashMap<ItemID, FoodCombination.PartialIngredient>> itemsByPriority = new HashMap<>();
 
@@ -130,6 +132,7 @@ public class FoodCombinationsManager {
             int ingredientPriority = combinationIngredient.getPriority();
             if (ingredientPriority == lastPriority) {
             } else if (ingredientPriority == lastPriority + 1) {
+                // TODO(dont): change check to lastPriority > ingredientPriority and check every priority inbetween (change lastpriorityvalid check too)
                 if (!isLastPriorityValid(combination, itemsByPriority, lastPriority, ingredientQuantities)) {
                     Gdx.app.log("Combinations:getItemsByPriority", "Invalid priority: " + ingredientItem.getItemId() + " in combination " + combination.getResultItemId());
                     return null;
@@ -151,7 +154,18 @@ public class FoodCombinationsManager {
         }
     }
 
-    private static boolean isCombinationPossible(FoodCombination combination, Array<FoodCombination.PartialIngredient> ingredientItems,
+    public static HashMap<Integer, Array<FoodCombination.Ingredient>> groupCombinationByIngredientPriority(FoodCombination combination) {
+        HashMap<Integer, Array<FoodCombination.Ingredient>> ingredientsByPriority = new HashMap<>();
+        for (FoodCombination.Ingredient ingredient : combination.getIngredients().values()) {
+            ingredientsByPriority
+                .computeIfAbsent(ingredient.getPriority(), k -> new Array<>())
+                .add(ingredient);
+        }
+        return ingredientsByPriority;
+    }
+
+    private static boolean isCombinationPossible(FoodCombination combination,
+                                                 Array<FoodCombination.PartialIngredient> ingredientItems,
                                                  HashMap<ItemID, Integer> ingredientQuantities) {
         return getItemsByPriority(combination, ingredientItems, ingredientQuantities) != null;
     }
@@ -171,7 +185,7 @@ public class FoodCombinationsManager {
 
         HashMap<ItemID, FoodCombination.PartialIngredient> lastPriorityItems = itemsByPriority.get(lastPriority);
         if (lastPriorityItems == null || lastPriorityItems.isEmpty()) {
-            return false;
+            return false; // that's not cool. or is it?
         }
         for (FoodCombination.Ingredient lastPriorityIngredient : combination.getIngredientsOfPriority(lastPriority).values()) {
             if (!lastPriorityIngredient.isRequired()) continue;
@@ -187,75 +201,17 @@ public class FoodCombinationsManager {
         return true;
     }
 
-    public boolean isSatisfied(Array<FoodCombination.PartialIngredient> ingredientItems, FoodCombination combination) {
-        HashMap<ItemID, Integer> ingredientQuantities = calculateIngredientQuantities(ingredientItems);
-        HashMap<Integer, HashMap<ItemID, FoodCombination.PartialIngredient>> itemsByPriority =
-            getItemsByPriority(combination, ingredientItems, ingredientQuantities);
-
-        // shows that this combination is invalid.
-        if (itemsByPriority == null) {
-            return false;
-        }
-
-        // check each priority level, and compare with the combination, and what we have.
-        for (int currentPriority = 0; currentPriority <= combination.getHighestPriority(); currentPriority++) {
-            HashMap<ItemID, FoodCombination.PartialIngredient> itemsOfPriority = itemsByPriority.getOrDefault(currentPriority, new HashMap<>());
-            Collection<FoodCombination.Ingredient> ingredientsOfPriority = combination.getIngredientsOfPriority(currentPriority).values();
-
-            if (ingredientsOfPriority.isEmpty()) {
-                // there are no expected ingredients for this priority, yet we have some in hand.
-                if (!itemsOfPriority.isEmpty()) {
-                    return false;
-                }
-                continue;
-            }
-
-            if (ingredientsOfPriority.size() < itemsOfPriority.size()) {
-                return false;
-            }
-
-            List<FoodCombination.Ingredient> requiredIngredients = ingredientsOfPriority.stream()
-                .filter(FoodCombination.Ingredient::isRequired)
-                .collect(Collectors.toList());
-
-            if (!requiredIngredients.isEmpty() &&
-                !hasAllRequiredIngredients(requiredIngredients, itemsOfPriority)) {
-                return false;
-            }
-
-            for (FoodCombination.Ingredient ingredient : ingredientsOfPriority) {
-                // ignore the optional ones that aren't present in plate.
-                if (ingredient.isOptional() && !itemsOfPriority.containsKey(ingredient.getItemId())) {
-                    continue;
-                }
-
-                FoodCombination.PartialIngredient ingredientItem = itemsOfPriority.get(ingredient.getItemId());
-                if (ingredient.getState() != ingredientItem.getState()) {
-                    return false;
-                }
-
-                int availableQuantity = ingredientQuantities.getOrDefault(ingredient.getItemId(), 0);
-                // TODO: != or <
-                //  Should we allow adding three cheese to a double cheese burger??
-                if (availableQuantity != ingredient.getQuantity()) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+    public static boolean isSatisfied(Array<FoodCombination.PartialIngredient> ingredientItems, FoodCombination combination) {
+        return combination.isSatisfied(ingredientItems);
     }
 
-    private static boolean hasAllRequiredIngredients(List<FoodCombination.Ingredient> requiredIngredients, HashMap<ItemID, FoodCombination.PartialIngredient> ingredients) {
-        // there are required ones, but we don't have any.
-        if (ingredients == null || ingredients.isEmpty()) {
-            return false;
-        }
-        for (FoodCombination.Ingredient requiredIngredient : requiredIngredients) {
-            if (!ingredients.containsKey(requiredIngredient.getItemId())) {
-                return false;
+    public static FoodCombinationsManager from(FoodCombinationsManager... other) {
+        FoodCombinationsManager combined = new FoodCombinationsManager();
+        for (FoodCombinationsManager manager : other) {
+            for (FoodCombination combination : manager.getCombinations().values()) {
+                combined.addCombination(combination);
             }
         }
-        return true;
+        return combined;
     }
 }

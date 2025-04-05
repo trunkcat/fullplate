@@ -20,10 +20,23 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.utilities;
+package io.trunkcat.fullplate.screens;
 
-public enum GameScreen {
-    LoadingScreen,
-    LoginScreen,
-    HomeScreen
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
+import com.badlogic.gdx.utils.viewport.Viewport;
+
+public class CustomStage extends Stage {
+    protected final DragAndDrop dragAndDrop;
+
+    public CustomStage(Viewport viewport) {
+        super(viewport);
+
+        dragAndDrop = new DragAndDrop();
+        dragAndDrop.setKeepWithinStage(true);
+    }
+
+    public DragAndDrop getDragAndDrop() {
+        return dragAndDrop;
+    }
 }

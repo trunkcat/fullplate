@@ -44,19 +44,18 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
-import io.trunkcat.fullplate.CookGame;
 import io.trunkcat.fullplate.entities.PlaceData;
+import io.trunkcat.fullplate.screens.BaseScreen;
+import io.trunkcat.fullplate.screens.ScreenID;
 
 
-public class HomeScreen implements com.badlogic.gdx.Screen {
-    private final CookGame game;
-
+public class HomeScreen extends BaseScreen {
     private final Stage hudStage;
     private final Stage mapStage;
     private final MapGestureListener mapGestureHandler;
 
     public HomeScreen() {
-        game = CookGame.getInstance();
+        super(ScreenID.HOME_SCREEN);
 
         hudStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         setupHUD();
@@ -126,21 +125,6 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
     public void resize(int width, int height) {
         hudStage.getViewport().update(width, height, true);
         mapStage.getViewport().update(width, height, true);
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
     }
 
     @Override
@@ -307,7 +291,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
     private Vector2 calculateTableSize(Table table) {
         Vector2 size = new Vector2();
         table.layout();
-        for (Cell<?> cell : table.getCells()) {
+        for (Cell<?> cell : new Array.ArrayIterator<>(table.getCells())) {
             size.x += cell.getPrefWidth();
             size.y += cell.getPrefHeight();
         }

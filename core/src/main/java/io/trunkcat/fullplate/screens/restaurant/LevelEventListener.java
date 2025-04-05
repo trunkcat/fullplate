@@ -20,33 +20,35 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.components.base;
+package io.trunkcat.fullplate.screens.restaurant;
 
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Event;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
 
-public abstract class KitchenEvent extends Event {
-    public static class FoodConsumeEvent extends KitchenEvent {
-        private final Food food;
-        private final Actor provider;
-        private final Actor consumer;
+import io.trunkcat.fullplate.components.base.Customer;
+import io.trunkcat.fullplate.components.base.CustomerEvent;
 
-        public FoodConsumeEvent(Food food, Actor provider, Actor consumer) {
-            this.food = food;
-            this.provider = provider;
-            this.consumer = consumer;
+public class LevelEventListener implements EventListener {
+    private final LevelScreen.LevelData levelData;
+    private final LevelScreen.LevelProgress levelProgress;
+
+    LevelEventListener(LevelScreen.LevelData levelData, LevelScreen.LevelProgress levelProgress) {
+        this.levelData = levelData;
+        this.levelProgress = levelProgress;
+    }
+
+    @Override
+    public boolean handle(Event event) {
+        if (event instanceof CustomerEvent) {
+            CustomerEvent customerEvent = (CustomerEvent) event;
+            Customer customer = customerEvent.getCustomer();
+
+            if (event instanceof CustomerEvent.CustomerLeftEvent) {
+                levelProgress.setCoins(levelProgress.getCoins() + customer.getCoins());
+                levelProgress.setTip(levelProgress.getTip() + customer.getTip());
+                return true;
+            }
         }
-
-        public Food getFood() {
-            return food;
-        }
-
-        public Actor getProvider() {
-            return provider;
-        }
-
-        public Actor getConsumer() {
-            return consumer;
-        }
+        return false;
     }
 }

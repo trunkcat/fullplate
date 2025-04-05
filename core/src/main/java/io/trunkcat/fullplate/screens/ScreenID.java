@@ -20,18 +20,12 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.components;
+package io.trunkcat.fullplate.screens;
 
-import io.trunkcat.fullplate.components.base.Item;
-import io.trunkcat.fullplate.components.base.ItemStore;
-
-public class BurgerPattyTray extends ItemStore {
-    public BurgerPattyTray(int level, int initialStock) {
-        super(ItemID.BURGER_PATTY_TRAY, level, ItemID.BURGER_PATTY, initialStock);
-    }
-
-    protected Item produceItem() {
-        // TODO: change this level to the product's level. (get from player data)
-        return new BurgerPatty(level);
-    }
+public enum ScreenID {
+    UNKNOWN,
+    LOADING_SCREEN,
+    LOGIN_SCREEN,
+    HOME_SCREEN,
+    LEVEL_SCREEN
 }

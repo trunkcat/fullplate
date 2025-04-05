@@ -32,8 +32,6 @@ public class BurgerBunTray extends ItemStore {
 
     @Override
     protected Item produceItem() {
-        BurgerBun product = new BurgerBun(1);
-        product.setScale(2f);
-        return product;
+        return new BurgerBun(1);
     }
 }

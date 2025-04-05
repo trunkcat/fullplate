@@ -77,10 +77,10 @@ public abstract class FoodCooker extends Item {
     }
 
     private float getCookTime(FoodCombination combination) {
-        float baseCookTime = combination.getCookingTime();
-        float leastPossibleTime = baseCookTime * Constants.COOK_TIME_MIN_FACTOR;
+        float baseCookTime = combination.getProcessingTime();
+        float leastPossibleTime = baseCookTime * Constants.COOK_TIME_MIN_FACTOR; // todo: make these constants cooker specific
         float cookerDependentTime = baseCookTime / (1 + (level * Constants.FOOD_COOKER_LEVEL_SPEED_MODIFIER));
-        return Math.min(combination.getCookingTime(), Math.max(cookerDependentTime, leastPossibleTime));
+        return Math.min(baseCookTime, Math.max(cookerDependentTime, leastPossibleTime));
     }
 
     private float getOvercookTime(FoodCombination combination) {
@@ -101,15 +101,17 @@ public abstract class FoodCooker extends Item {
         return null;
     }
 
-    private void cook(float delta) {
+    private void cook() {
         if (compositeFood.isEmpty()) return;
+
+        float delta = Gdx.graphics.getDeltaTime();
 
         if (state == State.IDLE) {
             FoodCombination resolvedCombination = getCookableCombination();
             if (resolvedCombination == null) {
                 return;
             }
-            if (combinationsManager.isSatisfied(compositeFood.getIngredients(), resolvedCombination)) {
+            if (resolvedCombination.isSatisfied(compositeFood.getIngredients())) {
                 compositeFoodState = CompositeFoodState.LOCKED;
                 state = State.ACTIVE;
                 compositeFood.setCurrentState(Food.State.UNDER_PREPARED);
@@ -153,7 +155,7 @@ public abstract class FoodCooker extends Item {
     public void act(float delta) {
         super.act(delta);
 
-        cook(delta);
+        cook();
 
         if (compositeFoodState != CompositeFoodState.TAKEN_OUT) {
             // TODO: have safe areas for each holder, and pass the x and y of that area

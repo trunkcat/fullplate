@@ -24,36 +24,28 @@ package io.trunkcat.fullplate.components.base;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.scenes.scene2d.Event;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
-import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
-import com.badlogic.gdx.utils.Align;
 
-import io.trunkcat.fullplate.CookGame;
 import io.trunkcat.fullplate.components.ItemID;
+import io.trunkcat.fullplate.components.common.StageActor;
 import io.trunkcat.fullplate.utilities.AssetManager;
 
-public abstract class Item extends Group implements EventListener {
-    protected final CookGame game;
+public abstract class Item extends StageActor {
     protected ItemID itemId;
     protected int level;
 
     public Item(ItemID itemId, int level) {
-        game = CookGame.getInstance();
         this.itemId = itemId;
         this.level = level;
     }
 
     public static Texture loadTexture(ItemID itemId) {
         // TODO: consider level
-        return AssetManager.loadTexture("items/" + itemId.id + ".png");
+        return AssetManager.loadTexture("items/" + itemId.getId() + ".png");
     }
 
     public static Texture loadTexture(ItemID itemId, String param) {
         // TODO: consider level
-        return AssetManager.loadTexture("items/" + itemId.id + "_" + param + ".png");
+        return AssetManager.loadTexture("items/" + itemId.getId() + "_" + param + ".png");
     }
 
     public ItemID getItemId() {
@@ -77,28 +69,15 @@ public abstract class Item extends Group implements EventListener {
         // TODO: figure out animations
         Texture currentTexture = getTexture();
         if (currentTexture != null) {
-            setSize(currentTexture.getWidth(), currentTexture.getHeight());
-            setOrigin(Align.center);
-        }
-    }
-
-    @Override
-    public boolean handle(Event event) {
-        return false;
-    }
-
-    @Override
-    protected void setStage(Stage stage) {
-        super.setStage(stage);
-        if (stage != null) {
-            stage.addListener(this);
+            setSize(
+                currentTexture.getWidth() * getScaleX(),
+                currentTexture.getHeight() * getScaleY()
+            );
         }
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        super.draw(batch, parentAlpha);
-
         Texture currentTexture = getTexture();
         if (currentTexture != null) {
             batch.draw(
@@ -107,17 +86,7 @@ public abstract class Item extends Group implements EventListener {
                 0, 0, currentTexture.getWidth(), currentTexture.getHeight(), false, false
             );
         }
-    }
 
-    public DragAndDrop.Source getDragSource() {
-        return null;
-    }
-
-    public DragAndDrop.Target getDropTarget() {
-        return null;
-    }
-
-    protected void dispatchStageEvent(Event event) {
-        getStage().getRoot().fire(event);
+        super.draw(batch, parentAlpha);
     }
 }

@@ -137,11 +137,10 @@ public abstract class ItemStore extends Item {
 
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
                 Item producedItem = produceItem();
+                producedItem.setScale(1.5f);
                 stock -= 1;
                 payload.setDragActor(producedItem);
                 getStage().addActor(producedItem);
-
-                producedItem.setScale(5f);
                 return payload;
             }
 

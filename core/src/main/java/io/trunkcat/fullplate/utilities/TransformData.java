@@ -24,18 +24,17 @@ package io.trunkcat.fullplate.utilities;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
-public class TransformData {
-    private final float x;
-    private final float y;
-    private final int zIndex;
-    private final float scaleX;
-    private final float scaleY;
-    private final float originX;
-    private final float originY;
+public class TransformData extends Bounds {
+    public float width;
+    public float height;
+    public int zIndex;
+    public float scaleX;
+    public float scaleY;
+    public float originX;
+    public float originY;
 
-    public TransformData(float x, float y, int zIndex, float scaleX, float scaleY, float originX, float originY) {
-        this.x = x;
-        this.y = y;
+    public TransformData(float x, float y, float width, float height, int zIndex, float scaleX, float scaleY, float originX, float originY) {
+        super(x, y, width, height);
         this.zIndex = zIndex;
         this.scaleX = scaleX;
         this.scaleY = scaleY;
@@ -47,6 +46,8 @@ public class TransformData {
         this(
             actor.getX(),
             actor.getY(),
+            actor.getWidth(),
+            actor.getHeight(),
             actor.getZIndex(),
             actor.getScaleX(),
             actor.getScaleY(),
@@ -55,36 +56,8 @@ public class TransformData {
         );
     }
 
-    public float getX() {
-        return x;
-    }
-
-    public float getY() {
-        return y;
-    }
-
-    public int getzIndex() {
-        return zIndex;
-    }
-
-    public float getScaleX() {
-        return scaleX;
-    }
-
-    public float getScaleY() {
-        return scaleY;
-    }
-
-    public float getOriginX() {
-        return originX;
-    }
-
-    public float getOriginY() {
-        return originY;
-    }
-
     public void apply(Actor actor) {
-        actor.setPosition(x, y);
+        super.apply(actor);
         actor.setZIndex(zIndex);
         actor.setScale(scaleX, scaleY);
         actor.setOrigin(originX, originY);

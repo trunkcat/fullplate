@@ -20,18 +20,36 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.components;
+package io.trunkcat.fullplate.components.base;
 
-import io.trunkcat.fullplate.components.base.Item;
-import io.trunkcat.fullplate.components.base.ItemStore;
+import com.badlogic.gdx.utils.Array;
 
-public class BurgerPattyTray extends ItemStore {
-    public BurgerPattyTray(int level, int initialStock) {
-        super(ItemID.BURGER_PATTY_TRAY, level, ItemID.BURGER_PATTY, initialStock);
+import io.trunkcat.fullplate.utilities.Constants;
+
+public class Order {
+    private final FoodCombination combination;
+    private final int price;
+    private final float processingTime;
+
+    public Order(FoodCombination combination) {
+        this.combination = combination;
+        this.price = combination.getPrice();
+        this.processingTime = combination.getProcessingTime() + Constants.ADDITIONAL_PROCESSING_TIME; // TODO: for now
     }
 
-    protected Item produceItem() {
-        // TODO: change this level to the product's level. (get from player data)
-        return new BurgerPatty(level);
+    public FoodCombination getCombination() {
+        return combination;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public float getProcessingTime() {
+        return processingTime;
+    }
+
+    public boolean canBeSatisfied(Array<FoodCombination.PartialIngredient> ingredients) {
+        return combination.isSatisfied(ingredients);
     }
 }

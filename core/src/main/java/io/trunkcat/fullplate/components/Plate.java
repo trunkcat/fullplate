@@ -34,42 +34,48 @@ import io.trunkcat.fullplate.components.base.FoodHolder;
 import io.trunkcat.fullplate.components.base.IngredientsRenderer;
 
 public class Plate extends FoodHolder {
-    static FoodCombinationsManager COMBINATION_MANAGER = new FoodCombinationsManager();
+    public static FoodCombinationsManager COMBINATION_MANAGER = new FoodCombinationsManager();
 
     static {
         IngredientsRenderer burgerRenderer = new IngredientsRenderer() {
             @Override
-            public void render(HashMap<ItemID, FoodCombination.PartialIngredient> ingredients, float x, float y) {
+            public Rect render(HashMap<ItemID, FoodCombination.PartialIngredient> ingredients, float worldX, float worldY) {
+                Rect rect = super.render(ingredients, worldX, worldY);
+
+                float x = 0, y = 0;
+
                 FoodCombination.PartialIngredient burgerBun = ingredients.get(ItemID.BURGER_BUN);
                 if (burgerBun != null) {
-                    draw(burgerBun, x, y);
+                    draw(rect, burgerBun, x, y);
                 } else {
-                    return;
+                    return rect;
                 }
 
                 FoodCombination.PartialIngredient patty = ingredients.get(ItemID.BURGER_PATTY);
                 if (patty != null) {
                     y += 5;
-                    draw(patty, x, y);
+                    draw(rect, patty, x, y);
                 }
 
                 FoodCombination.PartialIngredient tomato = ingredients.get(ItemID.TOMATO);
                 if (tomato != null) {
                     y += 5;
-                    draw(tomato, x, y);
+                    draw(rect, tomato, x, y);
                 }
 
                 y += 5;
-                draw(burgerBun, x, y);
+                draw(rect, burgerBun, x, y);
+
+                return rect;
             }
         };
 
         FoodCombination burger = new FoodCombination(ItemID.BURGER, Food.State.PREPARED, burgerRenderer)
-            .addIngredient(new FoodCombination.Ingredient(ItemID.BURGER_BUN, 1, Food.State.PREPARED))
-            .addIngredient(new FoodCombination.Ingredient(ItemID.BURGER_PATTY, 1, true, 1, Food.State.PREPARED))
-            .addIngredient(new FoodCombination.Ingredient(ItemID.LETTUCE, 1, false, 1, Food.State.PREPARED))
-            .addIngredient(new FoodCombination.Ingredient(ItemID.CHEESE, 1, false, 1, Food.State.PREPARED))
-            .addIngredient(new FoodCombination.Ingredient(ItemID.TOMATO, 1, false, 1, Food.State.PREPARED));
+            .addIngredient(new FoodCombination.Ingredient(ItemID.BURGER_BUN, 1, Food.State.PREPARED, 2f))
+            .addIngredient(new FoodCombination.Ingredient(ItemID.BURGER_PATTY, 1, true, 1, Food.State.PREPARED, 10f));
+//            .addIngredient(new FoodCombination.Ingredient(ItemID.LETTUCE, 1, false, 1, Food.State.PREPARED, 0f))
+//            .addIngredient(new FoodCombination.Ingredient(ItemID.CHEESE, 1, false, 1, Food.State.PREPARED, 0f))
+//            .addIngredient(new FoodCombination.Ingredient(ItemID.TOMATO, 1, false, 1, Food.State.PREPARED, 0f));
 
         COMBINATION_MANAGER.addCombination(burger);
     }
@@ -83,8 +89,8 @@ public class Plate extends FoodHolder {
         });
         HashMap<ItemID, FoodCombination> combinations = this.combinationsManager.findAllPossibleCombinations(items);
         for (FoodCombination combination : combinations.values()) {
-            Gdx.app.log("combinations manager", combination.getResultItemId().id);
-            Gdx.app.log("combinations manager", String.valueOf(combinationsManager.isSatisfied(items, combination)));
+            Gdx.app.log("combinations manager", combination.getResultItemId().getId());
+            Gdx.app.log("combinations manager", String.valueOf(combination.isSatisfied(items)));
         }
     }
 }

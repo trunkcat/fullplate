@@ -75,10 +75,6 @@ public class CompositeFood extends Food {
         return ingredients;
     }
 
-    public void clearIngredients() {
-        ingredients.clear();
-    }
-
     public void lockCombination(FoodCombination combination) {
         this.lockedCombination = combination;
         this.itemId = combination.getResultItemId();
@@ -94,13 +90,18 @@ public class CompositeFood extends Food {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        super.draw(batch, parentAlpha);
-
         FoodCombination combination = isCombinationLocked()
             ? lockedCombination
             : combinationsManager.findOnePossibleCombination(ingredients);
+
+        // FIXME: it's not really recommended to setSize inside draw(). find a way to make this happen in act()
         if (combination != null) {
-            combination.render(batch, ingredients, getX(), getY());
+            IngredientsRenderer.Rect rect = combination.render(batch, ingredients, getX(), getY());
+            setSize(rect.getWidth(), rect.getHeight()); // setSize inexpensive if the size haven't changed
+        } else {
+            setSize(0, 0); // setSize inexpensive if the size haven't changed
         }
+
+        super.draw(batch, parentAlpha);
     }
 }

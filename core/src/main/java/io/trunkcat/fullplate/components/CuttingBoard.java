@@ -36,17 +36,21 @@ public class CuttingBoard extends FoodCooker {
     static {
         IngredientsRenderer cuttingBoardItemRenderer = new IngredientsRenderer() {
             @Override
-            public void render(HashMap<ItemID, FoodCombination.PartialIngredient> ingredients, float x, float y) {
+            public Rect render(HashMap<ItemID, FoodCombination.PartialIngredient> ingredients, float worldX, float worldY) {
+                Rect rect = super.render(ingredients, worldX, worldY);
+
+                float x = 0, y = 0;
+
                 if (ingredients.containsKey(ItemID.TOMATO)) {
-                    draw(ingredients.get(ItemID.TOMATO), x, y);
+                    draw(rect, ingredients.get(ItemID.TOMATO), x, y);
                 }
+
+                return rect;
             }
         };
 
         FoodCombination slicedTomato = new FoodCombination(ItemID.TOMATO, Food.State.PREPARED, cuttingBoardItemRenderer)
-            .addIngredient(new FoodCombination.Ingredient(ItemID.TOMATO, 1, Food.State.UNPREPARED));
-        slicedTomato
-            .setCookingTime(0f)
+            .addIngredient(new FoodCombination.Ingredient(ItemID.TOMATO, 1, Food.State.UNPREPARED, 0f))
             .setCookingPossible(true)
             .setOvercookingPossible(false);
 

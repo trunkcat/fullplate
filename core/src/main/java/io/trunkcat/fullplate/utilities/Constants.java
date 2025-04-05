@@ -48,4 +48,17 @@ public interface Constants {
      * Unit: seconds
      */
     float DEFAULT_OVERCOOKING_TIME = 15f;
+
+    // TODO: could make this randomised based on min and max, or based on the combination.
+    float ADDITIONAL_PROCESSING_TIME = 10f;
+
+    float TIME_BONUS_FACTOR = 0.2f; // 20% of the order processingTime is added to wait time.
+
+    int GOAL_OFFSET = 20; // this worth of extra orders are generated.
+
+    float MIN_CUSTOMER_SPAWN_COOLDOWN = 5f;
+    float MAX_CUSTOMER_SPAWN_COOLDOWN = 15f;
+
+    int MIN_ORDERS_PER_CUSTOMER = 1;
+    int MAX_ORDERS_PER_CUSTOMER = 3;
 }

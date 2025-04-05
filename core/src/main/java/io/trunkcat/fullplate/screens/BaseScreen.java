@@ -20,18 +20,55 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.components;
+package io.trunkcat.fullplate.screens;
 
-import io.trunkcat.fullplate.components.base.Item;
-import io.trunkcat.fullplate.components.base.ItemStore;
+import io.trunkcat.fullplate.CookGame;
 
-public class BurgerPattyTray extends ItemStore {
-    public BurgerPattyTray(int level, int initialStock) {
-        super(ItemID.BURGER_PATTY_TRAY, level, ItemID.BURGER_PATTY, initialStock);
+public abstract class BaseScreen implements com.badlogic.gdx.Screen {
+    protected final ScreenID screenID;
+    protected CookGame game;
+
+    public BaseScreen(ScreenID screenID) {
+        this.screenID = screenID;
+        game = CookGame.getInstance();
     }
 
-    protected Item produceItem() {
-        // TODO: change this level to the product's level. (get from player data)
-        return new BurgerPatty(level);
+    public ScreenID getScreenID() {
+        return screenID;
+    }
+
+    @Override
+    public void show() {
+
+    }
+
+    @Override
+    public void render(float delta) {
+
+    }
+
+    @Override
+    public void resize(int width, int height) {
+
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+
+    }
+
+    @Override
+    public void dispose() {
+
     }
 }
