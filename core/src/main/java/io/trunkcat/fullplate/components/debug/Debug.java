@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.components.common;
+package io.trunkcat.fullplate.components.debug;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;

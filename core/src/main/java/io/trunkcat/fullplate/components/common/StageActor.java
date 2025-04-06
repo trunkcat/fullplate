@@ -28,17 +28,18 @@ import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 
 import java.util.function.Function;
 
 import io.trunkcat.fullplate.CookGame;
+import io.trunkcat.fullplate.components.debug.Debug;
 import io.trunkcat.fullplate.screens.CustomStage;
 
 public class StageActor extends Group implements EventListener {
     protected final CookGame game;
     protected final Debug debug; // TODO: debug should be an actor within the group
-
 
     public enum StageActorType {
         UNKNOWN
@@ -122,5 +123,12 @@ public class StageActor extends Group implements EventListener {
 
     public DragAndDrop.Target getDropTarget() {
         return null;
+    }
+
+    public Table getDebugTable() {
+        Table table = new Table();
+        table.padLeft(15);
+        table.defaults().expandX().left();
+        return table;
     }
 }

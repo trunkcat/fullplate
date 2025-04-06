@@ -22,8 +22,11 @@
 
 package io.trunkcat.fullplate.components.base;
 
+import static io.trunkcat.fullplate.components.debug.DebugLabelStyles.label;
+
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Array;
 
 import io.trunkcat.fullplate.components.ItemID;
@@ -103,5 +106,20 @@ public class CompositeFood extends Food {
         }
 
         super.draw(batch, parentAlpha);
+    }
+
+    @Override
+    public Table getDebugTable() {
+        Table table = super.getDebugTable();
+
+        table.add(label("combination locked: " + isCombinationLocked())).row();
+        FoodCombination combination = combinationsManager.findOnePossibleCombination(ingredients);
+        table.add(label("combination: " + (combination == null ? null : combination.getResultItemId()))).row();
+        table.add(label("ingredients: " + ingredients.size)).row();
+        for (FoodCombination.PartialIngredient ingredient : new Array.ArrayIterator<>(ingredients)) {
+            table.add(label("     - " + ingredient.itemId.toString())).row();
+        }
+
+        return table;
     }
 }

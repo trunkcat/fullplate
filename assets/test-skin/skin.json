@@ -1,0 +1,37 @@
+{
+com.badlogic.gdx.graphics.Color: {
+	RGBA_255_255_255_38: {
+		r: 1
+		g: 1
+		b: 1
+		a: 0.039215688
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
+	alpha-138-white-bg: {
+		name: alpha-10-white-bg
+		color: {
+			r: 1
+			g: 1
+			b: 1
+			a: 0.51123595
+		}
+	}
+	tree-bg: {
+		name: white-pixel
+		color: RGBA_255_255_255_38
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
+	default: {
+		hScrollKnob: alpha-150
+		vScrollKnob: alpha-150
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Tree$TreeStyle: {
+	default: {
+		plus: tree-plus
+		minus: tree-minus
+	}
+}
+}

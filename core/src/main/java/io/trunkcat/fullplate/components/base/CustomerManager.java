@@ -40,8 +40,8 @@ public class CustomerManager extends StageActor {
     private final Array<Order> ordersLeft = new Array<>();
     private float spawnCooldown = 0f;
 
-    private float customersSpawned = 0;
-    private float customersDespawned = 0;
+    private int customersSpawned = 0;
+    private int customersDespawned = 0;
 
     public CustomerManager(
         Vector2[] seatPositions,
@@ -102,8 +102,6 @@ public class CustomerManager extends StageActor {
             if (customersDespawned == customersSpawned && ordersLeft.isEmpty()) {
                 dispatchStageEvent(new LevelEvent.LevelCompletedEvent());
             }
-
-            Gdx.app.log("e", customersDespawned + " " + customersSpawned);
             return true;
         }
 

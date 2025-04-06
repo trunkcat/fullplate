@@ -82,4 +82,9 @@ public enum ItemID {
     public int getCost() {
         return cost;
     }
+
+    @Override
+    public String toString() {
+        return id + " (" + type.name() + ") " + cost + " coins";
+    }
 }

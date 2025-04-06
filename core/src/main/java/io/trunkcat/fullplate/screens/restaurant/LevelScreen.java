@@ -28,14 +28,13 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Event;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import io.trunkcat.fullplate.components.BurgerBunTray;
@@ -48,16 +47,19 @@ import io.trunkcat.fullplate.components.base.CustomerManager;
 import io.trunkcat.fullplate.components.base.FoodCombinationsManager;
 import io.trunkcat.fullplate.components.base.Item;
 import io.trunkcat.fullplate.components.base.LevelEvent;
+import io.trunkcat.fullplate.components.debug.DebugStage;
 import io.trunkcat.fullplate.screens.BaseScreen;
 import io.trunkcat.fullplate.screens.CustomStage;
 import io.trunkcat.fullplate.screens.ScreenID;
 
 // TODO: Extract hud and kitchen
 public class LevelScreen extends BaseScreen {
-    private final Stage hudStage;
+    private final CustomStage hudStage;
     private final CustomStage levelStage;
     private final LevelData levelData;
     private final LevelProgress levelProgress;
+    private final DebugStage debugStage;
+
 
     // HUD elements
     private Label experiencePointsLabel;
@@ -171,11 +173,11 @@ public class LevelScreen extends BaseScreen {
         super(ScreenID.LEVEL_SCREEN);
 
         // Make level data passed on from the constructor parameters.
-        levelData = new LevelData(2, 1);
+        levelData = new LevelData(2, 1000);
 
-        hudStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+        hudStage = new CustomStage("HUD Stage", new ScreenViewport());
 
-        levelStage = new CustomStage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+        levelStage = new CustomStage("Restaurant Stage", new ScreenViewport());
         Viewport viewport = levelStage.getViewport();
 
         // TODO: make the background adaptive:
@@ -226,6 +228,8 @@ public class LevelScreen extends BaseScreen {
             }
         });
 
+        debugStage = new DebugStage(levelStage, hudStage);
+
         setupHUD();
         setupKitchen();
     }
@@ -237,6 +241,7 @@ public class LevelScreen extends BaseScreen {
             ", screen size: " + Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight());
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
+        inputMultiplexer.addProcessor(debugStage);
         inputMultiplexer.addProcessor(hudStage);
         inputMultiplexer.addProcessor(levelStage);
         Gdx.input.setInputProcessor(inputMultiplexer);
@@ -256,6 +261,9 @@ public class LevelScreen extends BaseScreen {
 
         hudStage.act(delta);
         hudStage.draw();
+
+        debugStage.act(delta);
+        debugStage.draw();
     }
 
     @Override
@@ -270,6 +278,7 @@ public class LevelScreen extends BaseScreen {
 
     @Override
     public void dispose() {
+        debugStage.dispose();
         hudStage.dispose();
         levelStage.dispose();
     }

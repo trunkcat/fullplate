@@ -27,13 +27,20 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class CustomStage extends Stage {
+    private final String stageName;
     protected final DragAndDrop dragAndDrop;
 
-    public CustomStage(Viewport viewport) {
+    public CustomStage(String stageName, Viewport viewport) {
         super(viewport);
+
+        this.stageName = stageName;
 
         dragAndDrop = new DragAndDrop();
         dragAndDrop.setKeepWithinStage(true);
+    }
+
+    public String getStageName() {
+        return stageName;
     }
 
     public DragAndDrop getDragAndDrop() {

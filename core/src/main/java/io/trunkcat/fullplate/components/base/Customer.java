@@ -145,6 +145,7 @@ public class Customer extends StageActor { // extend item / entity
     }
 
     public void leave() {
+        // TODO: send events when leaving and left and manage them
         dispatchStageEvent(new CustomerEvent.CustomerLeftEvent(this));
         state = State.LEAVING;
     }

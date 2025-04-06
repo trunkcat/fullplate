@@ -58,7 +58,7 @@ public abstract class FoodHolder extends Item {
     private void alignCompositeFood() {
         compositeFood.setPosition(getX(), getY());
         compositeFood.setScale(getScaleX(), getScaleY());
-        compositeFood.setZIndex(getZIndex());
+        compositeFood.setZIndex(getZIndex() + 1);
     }
 
     @Override

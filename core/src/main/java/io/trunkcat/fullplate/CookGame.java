@@ -30,7 +30,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import io.trunkcat.fullplate.components.common.Debug;
+import io.trunkcat.fullplate.components.debug.Debug;
 import io.trunkcat.fullplate.entities.Player;
 import io.trunkcat.fullplate.models.PlayerData;
 import io.trunkcat.fullplate.models.responses.PlayerStats;
@@ -51,6 +51,7 @@ public class CookGame extends Game {
     public Debug debug;
 
     public Skin skin;
+    public Skin testSkin;
 
     @Override
     public void create() {
@@ -60,6 +61,8 @@ public class CookGame extends Game {
         player = new Player();
         preferences = Gdx.app.getPreferences("Full plate Preferences");
         skin = new Skin(Gdx.files.internal("cook-skin/0.5/skin.json"));
+        testSkin = new Skin(Gdx.files.internal("test-skin/skin.json"));
+
         debug = new Debug();
         String sessionToken = preferences.getString(Constants.PREF_KEY_SESSION_TOKEN);
 
