@@ -24,7 +24,6 @@ package io.trunkcat.fullplate.screens.home;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -54,12 +53,13 @@ import io.trunkcat.fullplate.CookGame;
 import io.trunkcat.fullplate.entities.PlaceData;
 import io.trunkcat.fullplate.models.PlayerData;
 import io.trunkcat.fullplate.models.responses.PlayerStats;
-import settings.GameSettings;
+import io.trunkcat.fullplate.settings.GameSettings;
+import io.trunkcat.fullplate.utilities.AudioManager;
 
 
 public class HomeScreen implements com.badlogic.gdx.Screen {
     private final CookGame game;
-
+    private AudioManager audioManager;
     private final Stage hudStage;
     private final Stage mapStage;
     private final MapGestureListener mapGestureHandler;
@@ -456,10 +456,9 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
 
 
     private void showAudioControls(Table audioControls) {
-        Preferences preferences = gameSettings.getPreferences();
 
-        float musicVolume = preferences.getFloat("musicVolume");
-        float soundVolume = preferences.getFloat("soundVolume");
+        float musicVolume = game.preferences.getFloat("musicVolume");
+        float soundVolume = game.preferences.getFloat("soundVolume");
 
         Label musicLabel = new Label("MUSIC", game.skin);
         Label soundLabel = new Label("SFX", game.skin);
@@ -474,7 +473,8 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         muteButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                gameSettings.setMute(!gameSettings.isMute());
+                audioManager.muteMusic(!audioManager.isMusicMuted());
+                audioManager.muteSound(!audioManager.isSoundMuted());
             }
         });
 
