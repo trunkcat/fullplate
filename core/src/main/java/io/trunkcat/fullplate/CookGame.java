@@ -34,6 +34,7 @@ import io.trunkcat.fullplate.models.PlayerData;
 import io.trunkcat.fullplate.models.responses.PlayerStats;
 import io.trunkcat.fullplate.network.HTTPClient;
 import io.trunkcat.fullplate.screens.home.HomeScreen;
+import io.trunkcat.fullplate.utilities.AudioManager;
 import io.trunkcat.fullplate.utilities.GameFont;
 
 public class CookGame extends Game {
@@ -42,6 +43,7 @@ public class CookGame extends Game {
     public HTTPClient httpClient;
     public Player player;
     public Preferences preferences;
+    public AudioManager audioManager;
 
     public Skin skin;
 
@@ -53,6 +55,7 @@ public class CookGame extends Game {
         player = new Player();
         preferences = Gdx.app.getPreferences("Full plate Preferences");
         skin = new Skin(Gdx.files.internal("cook-skin/0.5/skin.json"));
+        audioManager = new AudioManager();
 
         PlayerStats stats = new PlayerStats(60, 2000, 2000);
         player.data = new PlayerData(12, "swassy", stats);

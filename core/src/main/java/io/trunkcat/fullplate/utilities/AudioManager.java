@@ -8,11 +8,9 @@ import com.badlogic.gdx.files.FileHandle;
 
 import java.util.HashMap;
 
-import io.trunkcat.fullplate.CookGame;
 import io.trunkcat.fullplate.settings.GameSettings;
 
 public class AudioManager {
-    private CookGame game;
     private GameSettings gameSettings;
     private static AudioManager instance;
     private Music currentMusic;
@@ -23,7 +21,8 @@ public class AudioManager {
     private Preferences preferences;
     private final HashMap<String, Sound> soundCache = new HashMap<>();
 
-    private AudioManager() {
+    public AudioManager() {
+        gameSettings = GameSettings.getInstance();
         preferences = Gdx.app.getPreferences("Full plate Preferences");
         loadSoundSettings();
     }
@@ -37,13 +36,6 @@ public class AudioManager {
 
     private void saveSoundSettings() {
         gameSettings.saveSettings(musicVolume, soundVolume, isMusicMuted);
-    }
-
-    public static AudioManager getInstance() {
-        if (instance == null) {
-            instance = new AudioManager();
-        }
-        return instance;
     }
 
     // Music Controls
@@ -93,6 +85,10 @@ public class AudioManager {
 
     // SOUND METHODS
     public void playSound(String filePath) {
+        if (!Gdx.files.internal(filePath).exists()) {
+            Gdx.app.error("AudioManager", "File not found: " + filePath);
+            return;
+        }
         if (isSoundMuted) return;
 
         Sound sound = soundCache.get(filePath);
@@ -126,4 +122,13 @@ public class AudioManager {
         }
         soundCache.clear();
     }
+
+    public float getMusicVolume() {
+        return musicVolume;
+    }
+
+    public float getSoundVolume() {
+        return soundVolume;
+    }
+
 }

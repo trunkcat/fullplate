@@ -5,12 +5,8 @@ import com.badlogic.gdx.Preferences;
 
 public class GameSettings {
     private String username;
-
+    private static GameSettings instance;
     Preferences preferences = Gdx.app.getPreferences("Full plate Preferences");
-
-
-    public GameSettings() {
-    }
 
     public void loadSettings() {
     }
@@ -35,5 +31,12 @@ public class GameSettings {
 
     public Preferences getPreferences() {
         return preferences;
+    }
+
+    public static GameSettings getInstance() {
+        if (instance == null) {
+            instance = new GameSettings();
+        }
+        return instance;
     }
 }

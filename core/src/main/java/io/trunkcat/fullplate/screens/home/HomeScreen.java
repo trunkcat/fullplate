@@ -54,12 +54,10 @@ import io.trunkcat.fullplate.entities.PlaceData;
 import io.trunkcat.fullplate.models.PlayerData;
 import io.trunkcat.fullplate.models.responses.PlayerStats;
 import io.trunkcat.fullplate.settings.GameSettings;
-import io.trunkcat.fullplate.utilities.AudioManager;
 
 
 public class HomeScreen implements com.badlogic.gdx.Screen {
     private final CookGame game;
-    private AudioManager audioManager;
     private final Stage hudStage;
     private final Stage mapStage;
     private final MapGestureListener mapGestureHandler;
@@ -78,6 +76,8 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         FitViewport mapViewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), mapCamera);
         mapStage = new Stage(mapViewport);
         Image mapImage = new Image(new Texture(Gdx.files.internal("backgrounds/map-ref.png")));
+
+        game.audioManager.playMusic("music/bgmusic.ogg", true);
 
         // TODO: update this position to the current location the player is in when loaded
         mapImage.setPosition(0, 0);
@@ -387,7 +387,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         closeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                getWindow(actor).remove();
+                window.remove();
             }
         });
         content.add(closeButton).pad(10);
@@ -395,15 +395,6 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         setWindowContent(window, content);
         hudStage.addActor(window);
     }
-
-    private Window getWindow(Actor actor) {
-        while (actor != null) {
-            if (actor instanceof Window) return (Window) actor;
-            actor = actor.getParent();
-        }
-        return null;
-    }
-
 
     private void exitConfirmation(TextButton logoutButton) {
         logoutButton.addListener(new ChangeListener() {
@@ -434,7 +425,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                 cancelButton.addListener(new ChangeListener() {
                     @Override
                     public void changed(ChangeEvent event, Actor actor) {
-                        getWindow(actor).remove();
+                        confirmation.remove();
                     }
                 });
 
@@ -464,17 +455,35 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         Label soundLabel = new Label("SFX", game.skin);
 
         Slider musicSlider = new Slider(0.0f, 1.0f, 0.1f, false, game.skin);
+        musicSlider.setValue(game.audioManager.getMusicVolume());
         musicSlider.setScale(2);
 
         Slider soundSlider = new Slider(0.0f, 1.0f, 0.1f, false, game.skin);
+        soundSlider.setValue(game.audioManager.getSoundVolume());
         soundSlider.setScale(2);
+
+        musicSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                float musicVolume = musicSlider.getValue();
+                game.audioManager.setMusicVolume(musicVolume);
+            }
+        });
+
+        soundSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                float soundVolume = soundSlider.getValue();
+                game.audioManager.setSoundVolume(soundVolume);
+            }
+        });
 
         Button muteButton = new Button(game.skin, "volume-button");
         muteButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                audioManager.muteMusic(!audioManager.isMusicMuted());
-                audioManager.muteSound(!audioManager.isSoundMuted());
+                game.audioManager.muteMusic(!game.audioManager.isMusicMuted());
+                game.audioManager.muteSound(!game.audioManager.isSoundMuted());
             }
         });
 
@@ -523,7 +532,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         closeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                getWindow(actor).remove();
+                leaderboard.remove();
             }
         });
 
@@ -595,7 +604,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                     closeButton.addListener(new ChangeListener() {
                         @Override
                         public void changed(ChangeEvent event, Actor actor) {
-                            getWindow(actor).remove();
+                            window.remove();
                         }
                     });
 
@@ -676,7 +685,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
                             closeButton.addListener(new ChangeListener() {
                                 @Override
                                 public void changed(ChangeEvent event, Actor actor) {
-                                    getWindow(actor).remove();
+                                    levelWindow.remove();
                                 }
                             });
 
