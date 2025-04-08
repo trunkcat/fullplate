@@ -50,6 +50,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import io.trunkcat.fullplate.CookGame;
+import io.trunkcat.fullplate.entities.Event;
 import io.trunkcat.fullplate.entities.PlaceData;
 import io.trunkcat.fullplate.models.PlayerData;
 import io.trunkcat.fullplate.models.responses.PlayerStats;
@@ -63,6 +64,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
     private final MapGestureListener mapGestureHandler;
 
     PlayerData[] playerData;
+    Event[] events;
     GameSettings gameSettings = new GameSettings();
 
 
@@ -179,6 +181,25 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
             ),
             game.player.data,
         };
+
+        events = new Event[]{
+            new Event(
+                "Hell's Paradise",
+                1
+            ),
+            new Event(
+                "Polar Odyssey",
+                2
+            ),
+            new Event(
+                "Ramen Showoff!",
+                1
+            ),
+            new Event(
+                "Fisherman's Custody",
+                2
+            ),
+        };
     }
 
     @Override
@@ -267,6 +288,12 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         });
         Button notificationsButton = new Button(game.skin, "notifications-button");
         rightElements.add(notificationsButton).size(64, 64).right().padRight(15).pad(5);
+        notificationsButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                showEventsWindow();
+            }
+        });
         Button settingsButton = new Button(game.skin, "settings-button");
         settingsButton.addListener(new ChangeListener() {
             @Override
@@ -454,11 +481,11 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         Label musicLabel = new Label("MUSIC", game.skin);
         Label soundLabel = new Label("SFX", game.skin);
 
-        Slider musicSlider = new Slider(0.0f, 1.0f, 0.1f, false, game.skin);
+        Slider musicSlider = new Slider(0.0f, 1.0f, 0.01f, false, game.skin);
         musicSlider.setValue(game.audioManager.getMusicVolume());
         musicSlider.setScale(2);
 
-        Slider soundSlider = new Slider(0.0f, 1.0f, 0.1f, false, game.skin);
+        Slider soundSlider = new Slider(0.0f, 1.0f, 0.01f, false, game.skin);
         soundSlider.setValue(game.audioManager.getSoundVolume());
         soundSlider.setScale(2);
 
@@ -541,6 +568,62 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         setWindowContent(leaderboard, content);
         hudStage.addActor(leaderboard);
     }
+
+    private void showEventsWindow() {
+        Window content = createWindow();
+        Table mainTable = new Table();
+        mainTable.defaults().pad(10).fillX();
+
+        mainTable.add(new Label("Events", game.skin, "h1")).left().row();
+
+        Table eventTable = new Table();
+        eventTable.top(); // Align items to top
+        eventTable.defaults().pad(10).fillX();
+
+        ScrollPane scrollPane = new ScrollPane(eventTable, game.skin);
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setFadeScrollBars(true);
+        scrollPane.setForceScroll(false, true);
+        scrollPane.setScrollingDisabled(true, false);
+
+        // Add event rows
+        for (Event event : events) {
+            Table eventRow = new Table();
+            eventRow.defaults().left().pad(5);
+            Label name = new Label(event.getEventName(), game.skin, "h2");
+            TextButton playButton = new TextButton("PLAY", game.skin);
+
+            playButton.addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent e, Actor actor) {
+                    // start event
+                }
+            });
+
+            Table textCol = new Table();
+            textCol.add(name).left().fillX().row();
+
+            eventRow.add(textCol).expandX().fillX().left();
+            eventRow.add(playButton).right();
+
+            eventTable.add(eventRow).expandX().fillX().row();
+        }
+
+        TextButton closeButton = new TextButton("Close", game.skin);
+        closeButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                content.remove();
+            }
+        });
+
+        mainTable.add(scrollPane).expand().fill().row();
+        mainTable.add(closeButton).center().padTop(20);
+
+        setWindowContent(content, mainTable); // use mainTable here!
+        hudStage.addActor(content);
+    }
+
 
     private void addLeaderboardHeader(Table table) {
         Label rankLabel = new Label("#", game.skin, "h1");

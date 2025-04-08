@@ -36,6 +36,7 @@ public class AudioManager {
 
     private void saveSoundSettings() {
         gameSettings.saveSettings(musicVolume, soundVolume, isMusicMuted);
+        gameSettings.getPreferences().flush();
     }
 
     // Music Controls
