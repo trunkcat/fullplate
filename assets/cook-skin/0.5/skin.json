@@ -102,6 +102,14 @@ com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
 		up: place-lock-btn-up
 		down: place-lock-btn-down
 	}
+	buy-button: {
+		up: buy-button-up
+		down: buy-button-down
+	}
+	volume-button: {
+		up: volume-on
+		checked: volume-off
+	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	default: {
@@ -124,6 +132,20 @@ com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	h1: {
 		font: pally-bold-44
 		fontColor: RGBA_101_89_64_255
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
+	default: {
+		vScroll: vscroll
+		vScrollKnob: vertical-knob
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle: {
+	default-horizontal: {
+		knobOver: slider-knob
+		knobDown: slider-knob-down
+		background: hscroll
+		knob: slider-knob
 	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {

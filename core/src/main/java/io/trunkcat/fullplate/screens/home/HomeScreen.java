@@ -33,9 +33,12 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
@@ -44,15 +47,28 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
+import io.trunkcat.fullplate.CookGame;
+import io.trunkcat.fullplate.entities.Event;
 import io.trunkcat.fullplate.entities.PlaceData;
+import io.trunkcat.fullplate.models.PlayerData;
+import io.trunkcat.fullplate.models.responses.PlayerStats;
+import io.trunkcat.fullplate.settings.GameSettings;
 import io.trunkcat.fullplate.screens.BaseScreen;
 import io.trunkcat.fullplate.screens.ScreenID;
 
-
-public class HomeScreen extends BaseScreen {
+public class HomeScreen implements com.badlogic.gdx.Screen {
+    private final CookGame game;
     private final Stage hudStage;
     private final Stage mapStage;
     private final MapGestureListener mapGestureHandler;
+
+    PlayerData[] playerData;
+    Event[] events;
+    GameSettings gameSettings = new GameSettings();
+
 
     public HomeScreen() {
         super(ScreenID.HOME_SCREEN);
@@ -64,6 +80,8 @@ public class HomeScreen extends BaseScreen {
         FitViewport mapViewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), mapCamera);
         mapStage = new Stage(mapViewport);
         Image mapImage = new Image(new Texture(Gdx.files.internal("backgrounds/map-ref.png")));
+
+        game.audioManager.playMusic("music/bgmusic.ogg", true);
 
         // TODO: update this position to the current location the player is in when loaded
         mapImage.setPosition(0, 0);
@@ -83,20 +101,107 @@ public class HomeScreen extends BaseScreen {
                 PlaceData.PlaceType.RESTAURANT,
                 "Burger Place",
                 "A place for burgers",
+                null,
+                0,
+                5,
                 false,
-                new Vector2(2000, 400)
-            ),
+                new Vector2(2000, 400)),
             new PlaceData(
                 "noodle-stand",
                 PlaceData.PlaceType.RESTAURANT,
                 "Noodle stand",
                 "Craving for noodles? You got it!",
+                1000,
+                1,
+                5,
                 true,
-                new Vector2(1500, 700)
-            )
-        };
+                new Vector2(1500, 700)),
+            new PlaceData(
+                "pizza-place",
+                PlaceData.PlaceType.RESTAURANT,
+                "Pizza Place",
+                "Dem Pizzas!!!",
+                2000,
+                15,
+                40,
+                true,
+                new Vector2(1750, 1000))};
 
         setupMapPlaces(samplePlaces);
+
+        playerData = new PlayerData[]{
+            new PlayerData(
+                1,
+                "Sreeerag",
+                new PlayerStats(
+                    64,
+                    1000,
+                    15)
+            ),
+            new PlayerData(
+                2,
+                "Sidharth",
+                new PlayerStats(
+                    63,
+                    750,
+                    15
+                )
+            ),
+            new PlayerData(
+                3,
+                "Shivani",
+                new PlayerStats(
+                    62,
+                    3000,
+                    15)
+            ),
+            new PlayerData(
+                4,
+                "Sharun",
+                new PlayerStats(
+                    61,
+                    200,
+                    15
+                )
+            ),
+            new PlayerData(
+                5,
+                "Shahina",
+                new PlayerStats(
+                    59,
+                    500,
+                    15)
+            ),
+            new PlayerData(
+                6,
+                "You",
+                new PlayerStats(
+                    15,
+                    1200,
+                    15
+                )
+            ),
+            game.player.data,
+        };
+
+        events = new Event[]{
+            new Event(
+                "Hell's Paradise",
+                1
+            ),
+            new Event(
+                "Polar Odyssey",
+                2
+            ),
+            new Event(
+                "Ramen Showoff!",
+                1
+            ),
+            new Event(
+                "Fisherman's Custody",
+                2
+            ),
+        };
     }
 
     @Override
@@ -162,8 +267,20 @@ public class HomeScreen extends BaseScreen {
 
         Button leaderboardButton = new Button(game.skin, "leaderboard-button");
         rightElements.add(leaderboardButton).size(64, 64).right().padRight(15).pad(5);
+        leaderboardButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                showLeaderboardWindow();
+            }
+        });
         Button notificationsButton = new Button(game.skin, "notifications-button");
         rightElements.add(notificationsButton).size(64, 64).right().padRight(15).pad(5);
+        notificationsButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                showEventsWindow();
+            }
+        });
         Button settingsButton = new Button(game.skin, "settings-button");
         settingsButton.addListener(new ChangeListener() {
             @Override
@@ -207,56 +324,6 @@ public class HomeScreen extends BaseScreen {
         hudStage.addActor(mainTable);
     }
 
-    class PlacePointer extends Button {
-        private PlaceData placeData;
-
-        public PlacePointer(PlaceData placeData) {
-            this.placeData = placeData;
-
-            if (placeData.isLocked()) {
-                this.setStyle(game.skin.get("place-lock-button", ButtonStyle.class));
-            } else {
-                this.setStyle(game.skin.get("place-play-button", ButtonStyle.class));
-            }
-
-            addListener(new ChangeListener() {
-                @Override
-                public void changed(ChangeEvent event, Actor actor) {
-                    Window window = createWindow();
-                    Table content = new Table();
-                    content.defaults().pad(10).fillX();
-
-                    Label heading = new Label(placeData.getName(), game.skin, "h1");
-                    Label description = new Label(placeData.getDescription(), game.skin, "h2");
-
-                    content.add(heading).expandX().left();
-                    content.row();
-                    content.add(description).expandX().left();
-                    content.row();
-
-                    TextButton closeButton = new TextButton("Close", game.skin);
-                    closeButton.addListener(new ChangeListener() {
-                        @Override
-                        public void changed(ChangeEvent event, Actor actor) {
-                            window.remove();
-                        }
-                    });
-                    content.add(closeButton);
-
-                    setWindowContent(window, content);
-                    hudStage.addActor(window);
-                }
-            });
-
-            setBounds(
-                placeData.getPosition().x,
-                placeData.getPosition().y,
-                100, 100
-            );
-            setOrigin(Align.center);
-        }
-    }
-
     private void setupMapPlaces(PlaceData[] places) {
         Group placesGroup = new Group();
 
@@ -281,10 +348,7 @@ public class HomeScreen extends BaseScreen {
         float windowWidth = tableSize.x + window.getStyle().background.getMinWidth() + 100;
         float windowHeight = tableSize.y + window.getStyle().background.getMinHeight() + 100;
         window.setSize(windowWidth, windowHeight);
-        window.setPosition(
-            Gdx.graphics.getWidth() / 2f - windowWidth / 2f,
-            Gdx.graphics.getHeight() / 2f - windowHeight / 2f
-        );
+        window.setPosition(Gdx.graphics.getWidth() / 2f - windowWidth / 2f, Gdx.graphics.getHeight() / 2f - windowHeight / 2f);
         window.add(content).expand().fill();
     }
 
@@ -302,21 +366,35 @@ public class HomeScreen extends BaseScreen {
     private void showSettingsWindow() {
         Window window = createWindow();
         Table content = new Table();
-        content.defaults().pad(10).fillX();
+        content.defaults().pad(10).expandX();
+
+        //TODO: Load settings if player has a save (preferences)
 
         Label heading = new Label("Settings", game.skin, "h1");
         content.add(heading).expandX().left();
         content.row();
 
         Label audioLabel = new Label("Audio", game.skin, "h2");
-        content.add(audioLabel).expandX().left();
+        content.add(audioLabel).left().padBottom(10);
+        content.row();
+
+        Table audioControls = new Table();
+        audioControls.left();
+        showAudioControls(audioControls);
+        content.add(audioControls).left();
         content.row();
 
         Label accountLabel = new Label("Account", game.skin, "h2");
         Label accountInfo = new Label("Currently logged in as " + game.player.data.getUsername(), game.skin);
+
+        TextButton logoutButton = new TextButton("Log Out", game.skin);
+        exitConfirmation(logoutButton);
+
         content.add(accountLabel).left();
         content.row();
         content.add(accountInfo).left();
+        content.row();
+        content.add(logoutButton).left();
         content.row();
 
         TextButton closeButton = new TextButton("Close", game.skin);
@@ -330,5 +408,396 @@ public class HomeScreen extends BaseScreen {
 
         setWindowContent(window, content);
         hudStage.addActor(window);
+    }
+
+    private void exitConfirmation(TextButton logoutButton) {
+        logoutButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Window confirmation = createWindow();
+                confirmation.pad(20); // Add inner padding for nice spacing
+
+                Table exitTable = new Table();
+                exitTable.defaults().pad(10);
+
+                // Message label
+                Label messageLabel = new Label("Are you sure you want to leave?", game.skin);
+                messageLabel.setAlignment(Align.center);
+                exitTable.add(messageLabel).colspan(2).center().padBottom(20).row();
+
+                // Accept & Cancel buttons
+                TextButton acceptButton = new TextButton("Accept", game.skin);
+                TextButton cancelButton = new TextButton("Cancel", game.skin);
+
+                acceptButton.addListener(new ChangeListener() {
+                    @Override
+                    public void changed(ChangeEvent event, Actor actor) {
+                        game.player.logout();
+                    }
+                });
+
+                cancelButton.addListener(new ChangeListener() {
+                    @Override
+                    public void changed(ChangeEvent event, Actor actor) {
+                        confirmation.remove();
+                    }
+                });
+
+                exitTable.add(acceptButton).padRight(10).uniformX();
+                exitTable.add(cancelButton).uniformX();
+
+                // Set and show window
+                setWindowContent(confirmation, exitTable);
+                confirmation.pack();
+                confirmation.setPosition(
+                    (hudStage.getWidth() - confirmation.getWidth()) / 2,
+                    (hudStage.getHeight() - confirmation.getHeight()) / 2
+                );
+
+                hudStage.addActor(confirmation);
+            }
+        });
+    }
+
+
+    private void showAudioControls(Table audioControls) {
+
+        float musicVolume = game.preferences.getFloat("musicVolume");
+        float soundVolume = game.preferences.getFloat("soundVolume");
+
+        Label musicLabel = new Label("MUSIC", game.skin);
+        Label soundLabel = new Label("SFX", game.skin);
+
+        Slider musicSlider = new Slider(0.0f, 1.0f, 0.01f, false, game.skin);
+        musicSlider.setValue(game.audioManager.getMusicVolume());
+        musicSlider.setScale(2);
+
+        Slider soundSlider = new Slider(0.0f, 1.0f, 0.01f, false, game.skin);
+        soundSlider.setValue(game.audioManager.getSoundVolume());
+        soundSlider.setScale(2);
+
+        musicSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                float musicVolume = musicSlider.getValue();
+                game.audioManager.setMusicVolume(musicVolume);
+            }
+        });
+
+        soundSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                float soundVolume = soundSlider.getValue();
+                game.audioManager.setSoundVolume(soundVolume);
+            }
+        });
+
+        Button muteButton = new Button(game.skin, "volume-button");
+        muteButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.audioManager.muteMusic(!game.audioManager.isMusicMuted());
+                game.audioManager.muteSound(!game.audioManager.isSoundMuted());
+            }
+        });
+
+        audioControls.add(musicLabel).expandX().padRight(50).width(70);
+        audioControls.add(musicSlider).expandX().width(150);
+        audioControls.row().left().pad(15);
+        audioControls.add(soundLabel).expandX().padRight(50).width(70);
+        audioControls.add(soundSlider).expandX().width(150).pad(15);
+        audioControls.row().left();
+        audioControls.add(muteButton).expandX().size(64).pad(15);
+        audioControls.row().left();
+    }
+
+    private void showLeaderboardWindow() {
+        // Sort by coins in descending order
+        Arrays.sort(playerData, Comparator.comparingInt(p -> -p.getStats().getPlayerLevel()));
+
+        // Create Window
+        Window leaderboard = createWindow();
+        Table content = new Table();
+        content.defaults().pad(10).fillX();
+
+        content.add(new Label("Leaderboard", game.skin, "h1")).left().row();
+
+//        addLeaderboardHeader(content);
+
+        Table leaderboardTable = new Table();
+        leaderboardTable.defaults().pad(10).fillX();
+
+        boolean userInLeaderboard = false;
+
+        for (int i = 0; i < Math.min(5, playerData.length); i++) {
+            leaderboardTable.add(createPlayerRow(i + 1, playerData[i])).fillX().row();
+            if (playerData[i].getId() == game.player.data.getId()) userInLeaderboard = true;
+        }
+
+        if (!userInLeaderboard) {
+            leaderboardTable.add(createPlayerRow(getPlayerRank(), game.player.data)).fillX().row();
+        }
+
+        ScrollPane scrollPane = new ScrollPane(leaderboardTable, game.skin);
+        scrollPane.setFadeScrollBars(false);
+        content.add(scrollPane).expandX().row();
+
+        TextButton closeButton = new TextButton("Close", game.skin);
+        closeButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                leaderboard.remove();
+            }
+        });
+
+        content.add(closeButton).uniform().center().padTop(20);
+
+        setWindowContent(leaderboard, content);
+        hudStage.addActor(leaderboard);
+    }
+
+    private void showEventsWindow() {
+        Window content = createWindow();
+        Table mainTable = new Table();
+        mainTable.defaults().pad(10).fillX();
+
+        mainTable.add(new Label("Events", game.skin, "h1")).left().row();
+
+        Table eventTable = new Table();
+        eventTable.top(); // Align items to top
+        eventTable.defaults().pad(10).fillX();
+
+        ScrollPane scrollPane = new ScrollPane(eventTable, game.skin);
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setFadeScrollBars(true);
+        scrollPane.setForceScroll(false, true);
+        scrollPane.setScrollingDisabled(true, false);
+
+        // Add event rows
+        for (Event event : events) {
+            Table eventRow = new Table();
+            eventRow.defaults().left().pad(5);
+            Label name = new Label(event.getEventName(), game.skin, "h2");
+            TextButton playButton = new TextButton("PLAY", game.skin);
+
+            playButton.addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent e, Actor actor) {
+                    // start event
+                }
+            });
+
+            Table textCol = new Table();
+            textCol.add(name).left().fillX().row();
+
+            eventRow.add(textCol).expandX().fillX().left();
+            eventRow.add(playButton).right();
+
+            eventTable.add(eventRow).expandX().fillX().row();
+        }
+
+        TextButton closeButton = new TextButton("Close", game.skin);
+        closeButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                content.remove();
+            }
+        });
+
+        mainTable.add(scrollPane).expand().fill().row();
+        mainTable.add(closeButton).center().padTop(20);
+
+        setWindowContent(content, mainTable); // use mainTable here!
+        hudStage.addActor(content);
+    }
+
+
+    private void addLeaderboardHeader(Table table) {
+        Label rankLabel = new Label("#", game.skin, "h1");
+        Label nameLabel = new Label("nickname", game.skin, "h1");
+        Label levelLabel = new Label("player level", game.skin, "h1");
+
+        table.add(rankLabel).left();
+        table.add(nameLabel).center();
+        table.add(levelLabel).right();
+        table.row();
+    }
+
+    private Table createPlayerRow(int rank, PlayerData player) {
+        Table row = new Table();
+        row.defaults().pad(10).fillX();
+
+        Label rankLabel = new Label(String.valueOf(rank), game.skin);
+        Label nameLabel = new Label(player.getUsername(), game.skin);
+        Label levelLabel = new Label("LVL " + player.getStats().getPlayerLevel(), game.skin);
+
+        row.add(rankLabel).width(50).left();
+        row.add(nameLabel).expandX().left();
+        row.add(levelLabel).width(100).right();
+
+        return row;
+    }
+
+    private int getPlayerRank() {
+        for (int i = 0; i < playerData.length; i++) {
+            if (playerData[i].getId() == game.player.data.getId()) {
+                return i + 1;
+            }
+        }
+        return playerData.length;
+    }
+
+    class PlacePointer extends Button {
+        private final PlaceData placeData;
+
+        public PlacePointer(PlaceData placeData) {
+            this.placeData = placeData;
+            TextButton closeButton = new TextButton("Close", game.skin);
+
+            if (placeData.isLocked()) {
+                this.setStyle(game.skin.get("place-lock-button", ButtonStyle.class));
+            } else {
+                this.setStyle(game.skin.get("place-play-button", ButtonStyle.class));
+            }
+
+            addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    Window window = createWindow();
+                    Table content = new Table();
+                    content.defaults().pad(10).fillX();
+
+                    Label heading = new Label(placeData.getName(), game.skin, "h1");
+                    content.add(heading).expandX().left();
+                    content.row();
+
+                    closeButton.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            window.remove();
+                        }
+                    });
+
+                    TextButton buyButton = new TextButton("Buy", game.skin);
+                    buyButton.addListener(new ChangeListener() {
+                        final boolean unlockable = game.player.data.getStats().getPlayerLevel() >= placeData.getRequiredLevel();
+                        private boolean errorLabelAdded = false;
+
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            if (unlockable) {
+                                int playerMoney = game.player.data.getStats().getCoins();
+                                if (playerMoney >= placeData.getCost()) {
+                                    placeData.setLocked(false);
+                                    setStyle(game.skin.get("place-play-button", ButtonStyle.class));
+                                    game.player.data.getStats().setCoins(playerMoney - placeData.getCost());
+                                    hudStage.clear();
+                                    setupHUD();
+                                    window.remove();
+                                } else {
+                                    if (!errorLabelAdded) {
+                                        Label neededMoney = new Label("You need $" + (placeData.getCost() - playerMoney) + "!", game.skin, "h1");
+                                        content.add(neededMoney).expandX().uniform();
+                                        content.row();
+                                        errorLabelAdded = true;
+                                    }
+                                }
+                            } else {
+                                if (!errorLabelAdded) {
+                                    Label lockState = new Label("You do not meet the levels to unlock this place!", game.skin, "h2");
+                                    lockState.setWrap(true);
+                                    content.add(lockState).expandX().fillX().pad(10).uniform();
+                                    content.row();
+                                    errorLabelAdded = true;
+                                }
+
+                            }
+                        }
+                    });
+
+                    TextButton playButton = getTextButton(heading);
+
+                    if (placeData.getCost() != null && placeData.isLocked()) {
+                        Label info = new Label(placeData.getDescription(), game.skin, "h2");
+                        content.add(info).expandX().left();
+                        content.row();
+                        Label cost = new Label("$ " + placeData.getCost().toString(), game.skin, "h1");
+                        content.add(cost).expandX().center();
+                        content.row();
+                        content.add(closeButton).expandX().left().uniform();
+                        content.add(buyButton).fillX().uniform();
+                        content.row();
+                    } else {
+                        //TODO : Get Play button window working
+                        Label description = new Label(placeData.getDescription(), game.skin, "h2");
+                        content.add(description).expandX().left();
+                        content.row();
+                        content.add(closeButton).expandX().left().uniform();
+                        content.add(playButton).fillX().uniform();
+                        content.row();
+                    }
+
+
+                    setWindowContent(window, content);
+                    hudStage.addActor(window);
+                }
+
+                private TextButton getTextButton(Label heading) {
+                    TextButton playButton = new TextButton("Play", game.skin);
+
+                    playButton.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            Window levelWindow = createWindow();
+                            Table levelContent = new Table();
+                            levelContent.defaults().pad(10).fillX();
+
+                            closeButton.addListener(new ChangeListener() {
+                                @Override
+                                public void changed(ChangeEvent event, Actor actor) {
+                                    levelWindow.remove();
+                                }
+                            });
+
+                            Table levelsTable = new Table();
+                            levelsTable.defaults().pad(10).fillX();
+
+                            // Add levels to the table
+                            ButtonGroup<Button> buttonGroup = new ButtonGroup<>();
+                            buttonGroup.setMaxCheckCount(1);
+                            buttonGroup.setMinCheckCount(1);
+
+                            int levelCount = placeData.getLevelCount();
+                            for (int i = 1; i <= levelCount; i++) {
+                                TextButton button = new TextButton(String.valueOf(i), game.skin);
+                                buttonGroup.add(button);
+                                levelsTable.add(button).expandX().fillX();
+                                if (i % 3 == 0) levelsTable.row(); // New row every 3 buttons
+                            }
+
+                            levelsTable.row();
+
+                            ScrollPane scrollPane = new ScrollPane(levelsTable, game.skin);
+                            scrollPane.setScrollingDisabled(true, false);
+                            scrollPane.setFadeScrollBars(true);
+
+                            levelContent.add(heading).expandX().left();
+                            levelContent.row();
+                            levelContent.add(scrollPane).expand().fill().height(300);
+                            levelContent.row();
+                            levelContent.add(closeButton).expandX().uniform();
+                            levelContent.row();
+
+                            setWindowContent(levelWindow, levelContent);
+                            hudStage.addActor(levelWindow);
+                        }
+                    });
+                    return playButton;
+                }
+            });
+
+            setBounds(placeData.getPosition().x, placeData.getPosition().y, 100, 100);
+            setOrigin(Align.center);
+        }
     }
 }

@@ -35,6 +35,8 @@ import io.trunkcat.fullplate.entities.Player;
 import io.trunkcat.fullplate.models.PlayerData;
 import io.trunkcat.fullplate.models.responses.PlayerStats;
 import io.trunkcat.fullplate.network.HTTPClient;
+import io.trunkcat.fullplate.screens.home.HomeScreen;
+import io.trunkcat.fullplate.utilities.AudioManager;
 import io.trunkcat.fullplate.screens.BaseScreen;
 import io.trunkcat.fullplate.screens.ScreenID;
 import io.trunkcat.fullplate.screens.restaurant.LevelScreen;
@@ -47,6 +49,7 @@ public class CookGame extends Game {
     public HTTPClient httpClient;
     public Player player;
     public Preferences preferences;
+    public AudioManager audioManager;
     private ScreenID currentScreen = ScreenID.UNKNOWN;
     public Debug debug;
 
@@ -61,15 +64,15 @@ public class CookGame extends Game {
         player = new Player();
         preferences = Gdx.app.getPreferences("Full plate Preferences");
         skin = new Skin(Gdx.files.internal("cook-skin/0.5/skin.json"));
+        audioManager = new AudioManager();
         testSkin = new Skin(Gdx.files.internal("test-skin/skin.json"));
-
         debug = new Debug();
-        String sessionToken = preferences.getString(Constants.PREF_KEY_SESSION_TOKEN);
 
-        PlayerStats stats = new PlayerStats(1, 100, 1000);
-        player.data = new PlayerData(12, "dunks", stats);
-        setScreen(new LevelScreen());
+        PlayerStats stats = new PlayerStats(60, 2000, 2000);
+        player.data = new PlayerData(12, "swassy", stats);
+        setScreen(new HomeScreen());
 
+//        String sessionToken = preferences.getString(Constants.PREF_KEY_SESSION_TOKEN);
 //        if (sessionToken != null && !sessionToken.isEmpty()) {
 //            httpClient.setAuthSessionToken(sessionToken);
 //            setScreen(new LoadingScreen());

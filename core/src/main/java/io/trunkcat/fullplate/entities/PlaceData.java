@@ -29,7 +29,9 @@ public class PlaceData {
     private PlaceType type;
     private String name;
     private String description;
-
+    private final Integer cost;
+    private final int levelCount;
+    private final int requiredLevel;
     private boolean locked;
     private Vector2 position;
 
@@ -38,11 +40,22 @@ public class PlaceData {
         EVENT
     }
 
-    public PlaceData(String id, PlaceType type, String name, String description, boolean locked, Vector2 position) {
+    public PlaceData(String id,
+                     PlaceType type,
+                     String name,
+                     String description,
+                     Integer cost,
+                     int requiredLevel,
+                     int levelCount,
+                     boolean locked,
+                     Vector2 position) {
         this.id = id;
         this.type = type;
         this.name = name;
         this.description = description;
+        this.cost = cost;
+        this.requiredLevel = requiredLevel;
+        this.levelCount = levelCount;
         this.locked = locked;
         this.position = position;
     }
@@ -77,6 +90,18 @@ public class PlaceData {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getCost() {
+        return cost;
+    }
+
+    public int getRequiredLevel() {
+        return requiredLevel;
+    }
+
+    public int getLevelCount() {
+        return levelCount;
     }
 
     public boolean isLocked() {

@@ -40,16 +40,37 @@ button-up
   orig: 214, 64
   offset: 0, 0
   index: -1
+buy-button-down
+  rotate: false
+  xy: 67, 57
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+buy-button-up
+  rotate: false
+  xy: 67, 123
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+hscroll
+  rotate: false
+  xy: 509, 383
+  size: 100, 13
+  orig: 100, 13
+  offset: 0, 0
+  index: -1
 notification-btn-down
   rotate: false
-  xy: 67, 95
+  xy: 133, 95
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
   index: -1
 notification-btn-up
   rotate: false
-  xy: 133, 161
+  xy: 251, 210
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
@@ -193,14 +214,14 @@ rect3
   index: -1
 settings-btn-down
   rotate: false
-  xy: 251, 210
+  xy: 283, 242
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
   index: -1
 settings-btn-up
   rotate: false
-  xy: 283, 242
+  xy: 35, 29
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
@@ -210,6 +231,20 @@ silver
   xy: 217, 304
   size: 100, 15
   orig: 100, 15
+  offset: 0, 0
+  index: -1
+slider-knob
+  rotate: false
+  xy: 161, 67
+  size: 26, 26
+  orig: 26, 26
+  offset: 0, 0
+  index: -1
+slider-knob-down
+  rotate: false
+  xy: 91, 29
+  size: 26, 26
+  orig: 26, 26
   offset: 0, 0
   index: -1
 textbutton-disabled
@@ -223,7 +258,7 @@ textbutton-disabled
   index: -1
 textbutton-down
   rotate: false
-  xy: 95, 102
+  xy: 119, 36
   size: 12, 19
   split: 2, 2, 7, 6
   pad: 5, 5, 7, 6
@@ -232,7 +267,7 @@ textbutton-down
   index: -1
 textbutton-up
   rotate: false
-  xy: 133, 140
+  xy: 133, 46
   size: 12, 19
   split: 2, 2, 5, 7
   pad: 5, 5, 8, 9
@@ -241,21 +276,49 @@ textbutton-up
   index: -1
 trophy-btn-down
   rotate: false
-  xy: 35, 29
+  xy: 133, 67
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
   index: -1
 trophy-btn-up
   rotate: false
-  xy: 67, 67
+  xy: 161, 95
   size: 26, 26
   orig: 26, 26
   offset: 0, 0
   index: -1
+vertical-knob
+  rotate: false
+  xy: 1007, 389
+  size: 13, 37
+  orig: 13, 37
+  offset: 0, 0
+  index: -1
+volume-off
+  rotate: false
+  xy: 63, 29
+  size: 26, 26
+  orig: 26, 26
+  offset: 0, 0
+  index: -1
+volume-on
+  rotate: false
+  xy: 199, 161
+  size: 26, 26
+  orig: 26, 26
+  offset: 0, 0
+  index: -1
+vscroll
+  rotate: false
+  xy: 189, 57
+  size: 13, 64
+  orig: 13, 64
+  offset: 0, 0
+  index: -1
 window-rect
   rotate: false
-  xy: 67, 123
+  xy: 133, 123
   size: 64, 64
   split: 8, 8, 8, 8
   pad: 16, 16, 16, 16
