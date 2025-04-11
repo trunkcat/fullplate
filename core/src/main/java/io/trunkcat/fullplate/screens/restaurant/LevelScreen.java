@@ -240,40 +240,6 @@ public class LevelScreen extends BaseScreen {
     }
 
     private void setupKitchen() {
-//        BurgerPattyTray burgerPattyTray = new BurgerPattyTray(1, 5);
-//        addLevelActor(burgerPattyTray, 100, 100);
-//
-//        BurgerBunTray burgerBunTray = new BurgerBunTray(1, 5);
-//        addLevelActor(burgerBunTray, 300, 100);
-//
-//        Plate plate1 = new Plate(1);
-//        addLevelActor(plate1, 500, 100);
-//
-//        FryingPan fryingPan1 = new FryingPan(1);
-//        addLevelActor(fryingPan1, 700, 100);
-//
-//        TomatoBowl tomatoBowl = new TomatoBowl(1, 500);
-//        addLevelActor(tomatoBowl, 900, 300);
-//
-//        CuttingBoard cuttingBoard1 = new CuttingBoard(1);
-//        addLevelActor(cuttingBoard1, 900, 100);
-//
-//        CustomerManager customerManager = new CustomerManager(
-//            new Vector2[]{
-//                // TODO: calculate this based on world width, customer actor width, and y pos.
-//                new Vector2(100, 700),
-//                new Vector2(400, 700),
-//                new Vector2(700, 700),
-//                new Vector2(1000, 700),
-//            },
-//            FoodCombinationsManager.from(
-//                Plate.COMBINATION_MANAGER
-//            ),
-//            levelData,
-//            levelProgress
-//        );
-//        levelStage.addActor(customerManager);
-
         BunCrate bunCrate = new BunCrate(1000);
         addLevelEntity(bunCrate, 100, 100);
 
@@ -286,12 +252,13 @@ public class LevelScreen extends BaseScreen {
         Plate plate = new Plate();
         addLevelEntity(plate, 800, 100);
 
-
         CustomerSystem customerSystem = new CustomerSystem(
             RecipeCollection.from(Plate.RECIPE_COLLECTION),
             levelData,
             levelProgress
         );
+
+        // todo: calculate this based on world width, customer actor width, and y pos.
         customerSystem.addSeat(new Seat(100, 700));
         customerSystem.addSeat(new Seat(500, 700));
         customerSystem.addSeat(new Seat(900, 700));
