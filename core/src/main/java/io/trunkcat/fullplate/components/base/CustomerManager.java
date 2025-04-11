@@ -30,11 +30,13 @@ import com.badlogic.gdx.utils.Array;
 
 import java.util.Arrays;
 
-import io.trunkcat.fullplate.components.common.StageActor;
-import io.trunkcat.fullplate.screens.restaurant.LevelScreen;
+import io.trunkcat.fullplate.components.common.Entity;
+import io.trunkcat.fullplate.screens.restaurant.LevelData;
+import io.trunkcat.fullplate.screens.restaurant.LevelEvent;
+import io.trunkcat.fullplate.screens.restaurant.LevelProgress;
 import io.trunkcat.fullplate.utilities.Constants;
 
-public class CustomerManager extends StageActor {
+public class CustomerManager extends Entity {
     private final Array<Seat> seats;
     private final FoodCombinationsManager combinationsManager;
     private final Array<Order> ordersLeft = new Array<>();
@@ -46,8 +48,8 @@ public class CustomerManager extends StageActor {
     public CustomerManager(
         Vector2[] seatPositions,
         FoodCombinationsManager combinationsManager,
-        LevelScreen.LevelData levelData,
-        LevelScreen.LevelProgress levelProgress
+        LevelData levelData,
+        LevelProgress levelProgress
     ) {
         if (seatPositions.length == 0) {
             throw new IllegalArgumentException("At least one seat is required for manager to act.");

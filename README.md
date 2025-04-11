@@ -15,4 +15,5 @@ Here are some details regarding the usage of the `DragAndDrop` class in this pro
    dispatch the event onto the stage.
 3. `DragAndDrop.Source::dragStop` should manage the payload only if drop target was found.
 4. `DragAndDrop.Target::drop` should dispatch an `KitchenEvent` and should not mess with the
-   `Payload.dragActor`.
+   `Payload.dragActor`. As this method is only called when `Target::drag` returns `true`, reduce the
+   duplicate checking.

@@ -26,10 +26,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 
 import io.trunkcat.fullplate.components.ItemID;
-import io.trunkcat.fullplate.components.common.StageActor;
+import io.trunkcat.fullplate.components.common.Entity;
 import io.trunkcat.fullplate.utilities.AssetManager;
 
-public abstract class Item extends StageActor {
+public abstract class Item extends Entity {
     protected ItemID itemId;
     protected int level;
 

@@ -130,7 +130,7 @@ public class DebugStage extends CustomStage {
             if (stageActor instanceof StageActor) {
                 Table debugTable = ((StageActor) stageActor).getDebugTable();
                 if (debugTable != null) {
-                    details.add(debugTable).colspan(details.getColumns()).row();
+                    details.add(debugTable).colspan(details.getColumns()).padLeft(40).row();
                 }
             }
         }

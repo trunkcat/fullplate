@@ -20,31 +20,27 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.utilities;
+package io.trunkcat.fullplate.components.kitchen;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 
-public class AnimationUtils {
-    public static Animation<TextureRegion> createAnimation(String sheetPath, int rows, int cols, float frameTime) {
-        Texture sheetTexture = AssetManager.loadTexture(sheetPath);
-        TextureRegion[][] splitSheet = TextureRegion.split(
-            sheetTexture,
-            sheetTexture.getWidth() / cols,
-            sheetTexture.getHeight() / rows
-        );
-        TextureRegion[] frames = new TextureRegion[cols * rows];
-        int index = 0;
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                frames[index++] = splitSheet[i][j];
-            }
-        }
-        return new Animation<>(frameTime, frames);
+public class Seat {
+    private final Vector2 position;
+    private boolean occupied;
+
+    public Seat(float x, float y) {
+        this.position = new Vector2(x, y);
     }
 
-    public static Animation<TextureRegion> createSingleFrameAnimation(String sheetPath) {
-        return createAnimation(sheetPath, 1, 1, 1f); // todo: do something about consistent timing
+    public Vector2 getPosition() {
+        return position;
+    }
+
+    public boolean isOccupied() {
+        return occupied;
+    }
+
+    public void setOccupied(boolean occupied) {
+        this.occupied = occupied;
     }
 }

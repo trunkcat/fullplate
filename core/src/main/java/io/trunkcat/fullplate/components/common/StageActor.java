@@ -22,73 +22,31 @@
 
 package io.trunkcat.fullplate.components.common;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
-
-import java.util.function.Function;
 
 import io.trunkcat.fullplate.CookGame;
-import io.trunkcat.fullplate.components.debug.Debug;
-import io.trunkcat.fullplate.screens.CustomStage;
 
 public class StageActor extends Group implements EventListener {
     protected final CookGame game;
-    protected final Debug debug; // TODO: debug should be an actor within the group
 
     public enum StageActorType {
-        UNKNOWN
+        ENTITY,
+        SYSTEM
     }
 
-    protected final StageActorType actorType; // TODO: implement this widely
-
-    public StageActor() {
-        game = CookGame.getInstance();
-        debug = game.debug;
-        actorType = StageActorType.UNKNOWN;
-    }
+    protected final StageActorType actorType;
 
     public StageActor(StageActorType actorType) {
         game = CookGame.getInstance();
-        debug = game.debug;
         this.actorType = actorType;
     }
 
-    @Override
-    public void draw(Batch batch, float parentAlpha) {
-        super.draw(batch, parentAlpha);
-
-        debug.setBatch(batch);
-        debug.font.setColor(Color.WHITE);
-
-        float visibleWidth = getWidth() * getScaleX();
-
-        Function<String, Float> centerX = (String text) -> {
-            float lineWidth = debug.getLineWidth(text);
-            return getX() + (visibleWidth - lineWidth) / 2;
-        };
-
-        float y = getY();
-
-        y -= 10;
-        String className = getClass().getSimpleName();
-        debug.text(className, centerX.apply(className), y);
-
-        y -= debug.getLineHeight() + 5;
-        String position = "(" + getX() + ", " + getY() + ", " + getZIndex() + ")";
-        debug.text(position, centerX.apply(position), y);
-
-        // TODO: enhance this debugging with shapes, maybe a side panel and toggle for debugging?
-    }
-
-    @Override
-    public boolean handle(Event event) {
-        return false;
+    public StageActorType getActorType() {
+        return actorType;
     }
 
     protected void dispatchStageEvent(Event event) {
@@ -96,33 +54,16 @@ public class StageActor extends Group implements EventListener {
     }
 
     @Override
+    public boolean handle(Event event) {
+        return false;
+    }
+
     protected void setStage(Stage stage) {
         super.setStage(stage);
 
         if (stage != null) {
             stage.addListener(this);
-
-            if (stage instanceof CustomStage) {
-                CustomStage customStage = (CustomStage) stage;
-
-                DragAndDrop.Source dragSource = getDragSource();
-                if (dragSource != null) {
-                    customStage.getDragAndDrop().addSource(dragSource);
-                }
-                DragAndDrop.Target dropTarget = getDropTarget();
-                if (dropTarget != null) {
-                    customStage.getDragAndDrop().addTarget(dropTarget);
-                }
-            }
         }
-    }
-
-    public DragAndDrop.Source getDragSource() {
-        return null;
-    }
-
-    public DragAndDrop.Target getDropTarget() {
-        return null;
     }
 
     public Table getDebugTable() {

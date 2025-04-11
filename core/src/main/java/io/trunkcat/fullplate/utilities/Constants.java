@@ -56,9 +56,15 @@ public interface Constants {
 
     int GOAL_OFFSET = 20; // this worth of extra orders are generated.
 
-    float MIN_CUSTOMER_SPAWN_COOLDOWN = 5f;
-    float MAX_CUSTOMER_SPAWN_COOLDOWN = 15f;
+    float MIN_CUSTOMER_SPAWN_COOLDOWN = 10f;
+    float MAX_CUSTOMER_SPAWN_COOLDOWN = 20f;
 
     int MIN_ORDERS_PER_CUSTOMER = 1;
     int MAX_ORDERS_PER_CUSTOMER = 3;
+
+    int DRAG_ACTOR_Z_INDEX = 100;
+
+    String KITCHEN_ENTITIES_PATH = "entities/kitchen/";
+
+    float CUSTOMER_WALKING_SPEED = 250f;  // TODO: could modify
 }

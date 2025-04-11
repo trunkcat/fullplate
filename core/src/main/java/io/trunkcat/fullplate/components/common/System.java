@@ -20,31 +20,10 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.utilities;
+package io.trunkcat.fullplate.components.common;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-
-public class AnimationUtils {
-    public static Animation<TextureRegion> createAnimation(String sheetPath, int rows, int cols, float frameTime) {
-        Texture sheetTexture = AssetManager.loadTexture(sheetPath);
-        TextureRegion[][] splitSheet = TextureRegion.split(
-            sheetTexture,
-            sheetTexture.getWidth() / cols,
-            sheetTexture.getHeight() / rows
-        );
-        TextureRegion[] frames = new TextureRegion[cols * rows];
-        int index = 0;
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                frames[index++] = splitSheet[i][j];
-            }
-        }
-        return new Animation<>(frameTime, frames);
-    }
-
-    public static Animation<TextureRegion> createSingleFrameAnimation(String sheetPath) {
-        return createAnimation(sheetPath, 1, 1, 1f); // todo: do something about consistent timing
+public abstract class System extends StageActor {
+    public System() {
+        super(StageActorType.SYSTEM);
     }
 }

@@ -31,7 +31,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class DebugLabelStyles {
     private static final Map<String, LabelStyle> labelStyles = new HashMap<>();
     private static final Color color = Color.WHITE;
@@ -71,19 +70,19 @@ public class DebugLabelStyles {
         return get(color, scale);
     }
 
-    public static Label label(String text) {
-        return new Label(text, get());
+    public static DebugLabel label(String text) {
+        return new DebugLabel(text, get());
     }
 
-    public static Label label(String text, Color color) {
-        return new Label(text, get(color));
+    public static DebugLabel label(String text, Color color) {
+        return new DebugLabel(text, get(color));
     }
 
-    public static Label label(String text, float scale) {
-        return new Label(text, get(scale));
+    public static DebugLabel label(String text, float scale) {
+        return new DebugLabel(text, get(scale));
     }
 
-    public static Label label(String text, Color color, float scale) {
-        return new Label(text, get(color, scale));
+    public static DebugLabel label(String text, Color color, float scale) {
+        return new DebugLabel(text, get(color, scale));
     }
 }

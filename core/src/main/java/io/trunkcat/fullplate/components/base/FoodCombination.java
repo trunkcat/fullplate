@@ -147,7 +147,6 @@ public class FoodCombination {
     private boolean overcookingPossible = true;
     private boolean ruiningPossible = true;
 
-
     public FoodCombination(ItemID resultItem, Food.State resultState, IngredientsRenderer renderer) {
         this.resultItemId = resultItem;
         this.resultState = resultState;

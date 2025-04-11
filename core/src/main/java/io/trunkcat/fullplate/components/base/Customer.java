@@ -30,11 +30,11 @@ import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.Array;
 
-import io.trunkcat.fullplate.components.common.StageActor;
+import io.trunkcat.fullplate.components.common.Entity;
 import io.trunkcat.fullplate.utilities.AssetManager;
 import io.trunkcat.fullplate.utilities.Constants;
 
-public class Customer extends StageActor { // extend item / entity
+public class Customer extends Entity { // extend item / entity
     public enum Type {
         NORMAL,
         BEGGAR,

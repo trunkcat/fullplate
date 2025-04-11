@@ -20,31 +20,21 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.utilities;
+package io.trunkcat.fullplate.components.debug;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 
-public class AnimationUtils {
-    public static Animation<TextureRegion> createAnimation(String sheetPath, int rows, int cols, float frameTime) {
-        Texture sheetTexture = AssetManager.loadTexture(sheetPath);
-        TextureRegion[][] splitSheet = TextureRegion.split(
-            sheetTexture,
-            sheetTexture.getWidth() / cols,
-            sheetTexture.getHeight() / rows
-        );
-        TextureRegion[] frames = new TextureRegion[cols * rows];
-        int index = 0;
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                frames[index++] = splitSheet[i][j];
-            }
-        }
-        return new Animation<>(frameTime, frames);
+public class DebugLabel extends Label {
+    public DebugLabel(CharSequence text, LabelStyle style) {
+        super(text, style);
     }
 
-    public static Animation<TextureRegion> createSingleFrameAnimation(String sheetPath) {
-        return createAnimation(sheetPath, 1, 1, 1f); // todo: do something about consistent timing
+    public DebugLabel indent(int spaces) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < spaces; i++) {
+            builder.append(" ");
+        }
+        this.setText(builder.toString() + this.getText());
+        return this;
     }
 }

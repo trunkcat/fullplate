@@ -20,13 +20,52 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.components.base;
+package io.trunkcat.fullplate.components.kitchen;
 
-import com.badlogic.gdx.scenes.scene2d.Event;
+public class PartialIngredient {
+    private final KitchenEntity.ID id;
+    private int quantity;
+    private FoodState state;
+    private final int level;
+    private final int maxLevel;
 
-public class LevelEvent extends Event {
-    public static class LevelCompletedEvent extends LevelEvent {
-        public LevelCompletedEvent() {
+    public PartialIngredient(KitchenEntity.ID id, int quantity, FoodState state) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive");
         }
+        this.id = id;
+        this.quantity = quantity;
+        this.state = state;
+        // todo: get level from game data.
+        this.level = 0;
+        this.maxLevel = 1;
+    }
+
+    public KitchenEntity.ID getId() {
+        return id;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public FoodState getState() {
+        return state;
+    }
+
+    public void setState(FoodState state) {
+        this.state = state;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public int getMaxLevel() {
+        return maxLevel;
     }
 }

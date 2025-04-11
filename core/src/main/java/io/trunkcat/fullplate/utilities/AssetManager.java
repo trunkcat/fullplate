@@ -23,12 +23,19 @@
 package io.trunkcat.fullplate.utilities;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 public class AssetManager {
     private static final HashMap<String, Texture> textures = new HashMap<>();
+    private static final HashMap<String, Texture> colorTextures = new HashMap<>();
+    private static final HashMap<String, NinePatch> ninePatches = new HashMap<>();
 
     public static Texture loadTexture(String path) {
         if (!textures.containsKey(path)) {
@@ -37,5 +44,30 @@ public class AssetManager {
             return loadedTexture;
         }
         return textures.get(path);
+    }
+
+    public static Texture colorTexture(Color color) {
+        String key = color.toString();
+        if (!colorTextures.containsKey(key)) {
+            Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+            pixmap.setColor(color);
+            pixmap.fill();
+            colorTextures.put(key, new Texture(pixmap));
+            pixmap.dispose();
+        }
+        return colorTextures.get(key);
+    }
+
+    public static NinePatch ninePatchFromTexture(String path, int[] splits) {
+        String key = path + "-" + Arrays.stream(splits)
+            .mapToObj(String::valueOf)
+            .collect(Collectors.joining("x"));
+        if (!ninePatches.containsKey(key)) {
+            Texture texture = loadTexture(path);
+            NinePatch ninePatch = new NinePatch(texture, splits[0], splits[1], splits[2], splits[3]);
+            ninePatches.put(key, ninePatch);
+            return ninePatch;
+        }
+        return ninePatches.get(key);
     }
 }
