@@ -22,14 +22,13 @@
 
 package io.trunkcat.fullplate.utilities;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class AnimationUtils {
-    public static Animation<TextureRegion> createAnimation(String sheetPath, int cols, int rows, int frameTime) {
-        Texture sheetTexture = new Texture(Gdx.files.internal(sheetPath));
+    public static Animation<TextureRegion> createAnimation(String sheetPath, int rows, int cols, float frameTime) {
+        Texture sheetTexture = AssetManager.loadTexture(sheetPath);
         TextureRegion[][] splitSheet = TextureRegion.split(
             sheetTexture,
             sheetTexture.getWidth() / cols,
@@ -43,5 +42,9 @@ public class AnimationUtils {
             }
         }
         return new Animation<>(frameTime, frames);
+    }
+
+    public static Animation<TextureRegion> createSingleFrameAnimation(String sheetPath) {
+        return createAnimation(sheetPath, 1, 1, 1f); // todo: do something about consistent timing
     }
 }

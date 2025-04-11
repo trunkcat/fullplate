@@ -44,6 +44,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import java.util.Arrays;
@@ -55,7 +56,8 @@ import io.trunkcat.fullplate.entities.PlaceData;
 import io.trunkcat.fullplate.models.PlayerData;
 import io.trunkcat.fullplate.models.responses.PlayerStats;
 import io.trunkcat.fullplate.settings.GameSettings;
-
+import io.trunkcat.fullplate.screens.BaseScreen;
+import io.trunkcat.fullplate.screens.ScreenID;
 
 public class HomeScreen implements com.badlogic.gdx.Screen {
     private final CookGame game;
@@ -69,7 +71,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
 
 
     public HomeScreen() {
-        game = CookGame.getInstance();
+        super(ScreenID.HOME_SCREEN);
 
         hudStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         setupHUD();
@@ -231,21 +233,6 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
     }
 
     @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
-
-    @Override
     public void dispose() {
         hudStage.dispose();
         mapStage.dispose();
@@ -321,7 +308,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
         // TODO: SLightly update the width of each button to make it look better (hack).
         //  Fix this by actually fixing the padding on the source skin styles.
         bottomBar.layout();
-        for (Cell<?> children : bottomBar.getCells()) {
+        for (Cell<?> children : new Array.ArrayIterator<>(bottomBar.getCells())) {
             if (children.getActor() instanceof TextButton) {
                 children.width(children.getPrefWidth() + 30f);
             }
@@ -368,7 +355,7 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
     private Vector2 calculateTableSize(Table table) {
         Vector2 size = new Vector2();
         table.layout();
-        for (Cell<?> cell : table.getCells()) {
+        for (Cell<?> cell : new Array.ArrayIterator<>(table.getCells())) {
             size.x += cell.getPrefWidth();
             size.y += cell.getPrefHeight();
         }

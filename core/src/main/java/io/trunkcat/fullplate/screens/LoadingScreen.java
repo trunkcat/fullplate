@@ -32,9 +32,9 @@ import io.trunkcat.fullplate.models.PlayerData;
 import io.trunkcat.fullplate.network.ResponseHandler;
 import io.trunkcat.fullplate.screens.home.HomeScreen;
 
-public class LoadingScreen extends Screen {
+public class LoadingScreen extends SimpleScreen {
     public LoadingScreen() {
-        super();
+        super(ScreenID.LOADING_SCREEN);
     }
 
     @Override
@@ -56,9 +56,7 @@ public class LoadingScreen extends Screen {
                 game.player.data = playerData;
                 Gdx.app.log("Load", "Logged in as " + game.player.data.getUsername());
                 game.setScreen(new HomeScreen());
-//                game.setScreen(new LevelScreen());
             }
-
 
             public void failure(String message) {
                 loadStatusLabel.setText(message);
@@ -66,6 +64,4 @@ public class LoadingScreen extends Screen {
             }
         }, PlayerData.class);
     }
-
-
 }

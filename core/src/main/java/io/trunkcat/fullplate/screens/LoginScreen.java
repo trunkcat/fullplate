@@ -36,9 +36,9 @@ import io.trunkcat.fullplate.models.responses.SignInData;
 import io.trunkcat.fullplate.network.ResponseHandler;
 import io.trunkcat.fullplate.utilities.Constants;
 
-public class LoginScreen extends Screen {
+public class LoginScreen extends SimpleScreen {
     public LoginScreen() {
-        super();
+        super(ScreenID.LOGIN_SCREEN);
     }
 
     @Override

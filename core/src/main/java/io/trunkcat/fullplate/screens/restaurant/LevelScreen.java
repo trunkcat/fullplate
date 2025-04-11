@@ -27,40 +27,52 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import io.trunkcat.fullplate.CookGame;
-import io.trunkcat.fullplate.components.BurgerPattyTray;
-import io.trunkcat.fullplate.components.Plate;
-import io.trunkcat.fullplate.components.base.BurgerBunTray;
-import io.trunkcat.fullplate.components.base.Item;
+import io.trunkcat.fullplate.components.common.System;
+import io.trunkcat.fullplate.components.debug.DebugStage;
+import io.trunkcat.fullplate.components.kitchen.CustomerSystem;
+import io.trunkcat.fullplate.components.kitchen.RecipeCollection;
+import io.trunkcat.fullplate.components.kitchen.Seat;
+import io.trunkcat.fullplate.components.utensils.BunCrate;
+import io.trunkcat.fullplate.components.utensils.Pan;
+import io.trunkcat.fullplate.components.utensils.PattyCrate;
+import io.trunkcat.fullplate.components.utensils.Plate;
+import io.trunkcat.fullplate.screens.BaseScreen;
+import io.trunkcat.fullplate.screens.CustomStage;
+import io.trunkcat.fullplate.screens.ScreenID;
 
-public class LevelScreen implements com.badlogic.gdx.Screen {
-    private final CookGame game;
+// TODO: Extract hud and kitchen
+public class LevelScreen extends BaseScreen {
+    private final CustomStage hudStage;
+    private final CustomStage levelStage;
+    private final LevelData levelData;
+    private final LevelProgress levelProgress;
+    private final DebugStage debugStage;
 
-    private final Stage hudStage;
-    private final Stage levelStage;
 
-    private final DragAndDrop dragAndDrop;
+    // HUD elements
+    private Label experiencePointsLabel;
+    private Label coinsLabel;
 
     public LevelScreen() {
-        game = CookGame.getInstance();
-        dragAndDrop = new DragAndDrop();
-        dragAndDrop.setKeepWithinStage(true);
+        super(ScreenID.LEVEL_SCREEN);
 
-        hudStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-        setupHUD();
+        // Make level data passed on from the constructor parameters.
+        levelData = new LevelData(2, 1000);
 
-        levelStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+        hudStage = new CustomStage("HUD Stage", new ScreenViewport());
+
+        levelStage = new CustomStage("Restaurant Stage", new ScreenViewport());
         Viewport viewport = levelStage.getViewport();
 
         // TODO: make the background adaptive:
@@ -73,18 +85,57 @@ public class LevelScreen implements com.badlogic.gdx.Screen {
         backgroundImage.setPosition((viewport.getWorldWidth() - backgroundImage.getWidth()) / 2f, 0);
 //        levelStage.addActor(backgroundImage);
 
+/*
         Image tableImage = new Image(new Texture(Gdx.files.internal("restaurants/table.png")));
         float tableImageAspectRatio = tableImage.getHeight() / tableImage.getWidth();
         tableImage.setWidth(viewport.getWorldWidth());
         tableImage.setHeight(viewport.getWorldWidth() * tableImageAspectRatio);
-//        levelStage.addActor(tableImage);
+        tableImage.addAction(Actions.alpha(0.1f));
+        levelStage.addActor(tableImage);
+*/
 
+        levelStage.setDebugAll(true);
+
+        levelProgress = new LevelProgress();
+        levelStage.addListener(new LevelEventListener(levelData, levelProgress) {
+            @Override
+            public boolean handle(Event event) {
+                boolean handled = super.handle(event);
+
+                if (event instanceof LevelEvent) {
+                    if (event instanceof LevelEvent.LevelCompletedEvent) {
+                        Window window = createWindow();
+
+                        Table content = new Table();
+
+                        boolean won = levelProgress.getCoins() >= levelData.getCoinsGoal();
+                        String title = "LEVEL " + (won ? "WON" : "FAILED");
+
+                        content.add(new Label(title, game.skin, "h1"));
+
+                        setWindowContent(window, content);
+                        hudStage.addActor(window);
+                    }
+                }
+
+                return handled;
+            }
+        });
+
+        debugStage = new DebugStage(levelStage, hudStage);
+
+        setupHUD();
         setupKitchen();
     }
 
     @Override
     public void show() {
+        Gdx.app.log("Stage", "Viewport world size: " + levelStage.getViewport().getWorldWidth() +
+            "x" + levelStage.getViewport().getWorldHeight() +
+            ", screen size: " + Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight());
+
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
+        inputMultiplexer.addProcessor(debugStage);
         inputMultiplexer.addProcessor(hudStage);
         inputMultiplexer.addProcessor(levelStage);
         Gdx.input.setInputProcessor(inputMultiplexer);
@@ -95,56 +146,59 @@ public class LevelScreen implements com.badlogic.gdx.Screen {
         Gdx.gl.glClearColor(0f, 0f, 0f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        // TODO: Extract hud and kitchen
+        coinsLabel.setText(getCoinsText());
+        experiencePointsLabel.setText(getExperiencePointsText());
+
         levelStage.act(delta);
         levelStage.draw();
 
         hudStage.act(delta);
         hudStage.draw();
+
+        debugStage.act(delta);
+        debugStage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
-        hudStage.getViewport().update(width, height, true);
-        levelStage.getViewport().update(width, height, true);
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
+        hudStage
+            .getViewport()
+            .update(width, height, true);
+        levelStage
+            .getViewport()
+            .update(width, height, true);
     }
 
     @Override
     public void dispose() {
+        debugStage.dispose();
         hudStage.dispose();
         levelStage.dispose();
+    }
+
+    // FIXME: shouldn't be this. abstract or extract.
+    private String getCoinsText() {
+        int coinsCollected = levelProgress.getCoins() + levelProgress.getTip();
+        return coinsCollected + " / " + levelData.getCoinsGoal() + " coins";
+    }
+
+    private String getExperiencePointsText() {
+        return levelProgress.getExperiencePoints() + " xp";
     }
 
     private void setupHUD() {
         Table mainTable = new Table();
         mainTable.setFillParent(true);
 
-        // TOP BAR
+        // TODO: make all these custom actors or make helper string builders
         Table topBar = new Table();
         Table centerElements = new Table();
-        centerElements.setBackground(game.skin.getDrawable("rect-top"));
 
-        Label experiencePointsLabel = new Label(game.player.data.getStats().getExperiencePoints() + " xp", game.skin, "h2");
+        experiencePointsLabel = new Label(getExperiencePointsText(), game.skin, "h2");
         centerElements.add(experiencePointsLabel).space(15).padRight(30);
-        Label coinsLabel = new Label(game.player.data.getStats().getCoins() + " coins", game.skin, "h2");
+        coinsLabel = new Label(getCoinsText(), game.skin, "h2");
         centerElements.add(coinsLabel).space(15);
-
-        Button settingsButton = new Button(game.skin, "settings-button");
-        centerElements.add(settingsButton).size(64, 64).right().padRight(15).pad(5);
 
         topBar.add(centerElements).expandX().center();
 
@@ -178,7 +232,7 @@ public class LevelScreen implements com.badlogic.gdx.Screen {
     private Vector2 calculateTableSize(Table table) {
         Vector2 size = new Vector2();
         table.layout();
-        for (Cell<?> cell : table.getCells()) {
+        for (Cell<?> cell : new Array.ArrayIterable<>(table.getCells())) {
             size.x += cell.getPrefWidth();
             size.y += cell.getPrefHeight();
         }
@@ -186,30 +240,40 @@ public class LevelScreen implements com.badlogic.gdx.Screen {
     }
 
     private void setupKitchen() {
-        BurgerPattyTray burgerPattyTray = new BurgerPattyTray(1, 5);
-        addLevelActor(burgerPattyTray, 100, 100);
+        BunCrate bunCrate = new BunCrate(1000);
+        addLevelEntity(bunCrate, 100, 100);
 
-        BurgerBunTray burgerBunTray = new BurgerBunTray(1, 5);
-        addLevelActor(burgerBunTray, 300, 100);
+        PattyCrate pattyCrate = new PattyCrate(1000);
+        addLevelEntity(pattyCrate, 300, 100);
 
-        Plate plate1 = new Plate(1);
-        addLevelActor(plate1, 500, 100);
+        Pan pan = new Pan();
+        addLevelEntity(pan, 500, 100);
 
-//        Plate plate2 = new Plate(1);
-//        addLevelActor(plate2, 700, 100);
+        Plate plate = new Plate();
+        addLevelEntity(plate, 800, 100);
+
+        CustomerSystem customerSystem = new CustomerSystem(
+            RecipeCollection.from(Plate.RECIPE_COLLECTION),
+            levelData,
+            levelProgress
+        );
+
+        // todo: calculate this based on world width, customer actor width, and y pos.
+        customerSystem.addSeat(new Seat(100, 700));
+        customerSystem.addSeat(new Seat(500, 700));
+        customerSystem.addSeat(new Seat(900, 700));
+        customerSystem.addSeat(new Seat(1300, 700));
+
+        addLevelSystem(customerSystem);
     }
 
-    private void addLevelActor(Item item, int x, int y) {
-        DragAndDrop.Source dragSource = item.getDragSource();
-        DragAndDrop.Target dropTarget = item.getDropTarget();
-        if (dragSource != null) {
-            dragAndDrop.addSource(dragSource);
-        }
-        if (dropTarget != null) {
-            dragAndDrop.addTarget(dropTarget);
-        }
-
+    private void addLevelEntity(Actor item, int x, int y) {
         item.setPosition(x, y);
         levelStage.addActor(item);
+    }
+
+    private void addLevelSystem(System system) {
+        system.setVisible(false);
+        levelStage.addActor(system);
     }
 }
