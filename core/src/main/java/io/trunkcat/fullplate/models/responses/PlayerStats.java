@@ -26,14 +26,6 @@ public class PlayerStats {
     private int playerLevel;
     private int coins;
     private int experiencePoints;
-    public PlayerStats() {
-    }
-
-    public PlayerStats(int playerLevel, int coins, int experiencePoints) {
-        this.playerLevel = playerLevel;
-        this.coins = coins;
-        this.experiencePoints = experiencePoints;
-    }
 
     public PlayerStats() {
     }
@@ -52,7 +44,9 @@ public class PlayerStats {
         return coins;
     }
 
-    public void setCoins(int coins) { this.coins = coins; }
+    public void setCoins(int coins) {
+        this.coins = coins;
+    }
 
     public int getExperiencePoints() {
         return experiencePoints;

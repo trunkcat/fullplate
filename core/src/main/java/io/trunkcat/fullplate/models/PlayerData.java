@@ -28,15 +28,6 @@ public class PlayerData {
     private int id;
     private String username;
     private PlayerStats stats;
-    public PlayerData() {
-
-    }
-
-    public PlayerData(int id, String username, PlayerStats stats) {
-        this.id = id;
-        this.username = username;
-        this.stats = stats;
-    }
 
     public PlayerData() {
 

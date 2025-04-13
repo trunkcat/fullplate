@@ -50,17 +50,15 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import io.trunkcat.fullplate.CookGame;
 import io.trunkcat.fullplate.entities.Event;
 import io.trunkcat.fullplate.entities.PlaceData;
 import io.trunkcat.fullplate.models.PlayerData;
 import io.trunkcat.fullplate.models.responses.PlayerStats;
-import io.trunkcat.fullplate.settings.GameSettings;
 import io.trunkcat.fullplate.screens.BaseScreen;
 import io.trunkcat.fullplate.screens.ScreenID;
+import io.trunkcat.fullplate.settings.GameSettings;
 
-public class HomeScreen implements com.badlogic.gdx.Screen {
-    private final CookGame game;
+public class HomeScreen extends BaseScreen {
     private final Stage hudStage;
     private final Stage mapStage;
     private final MapGestureListener mapGestureHandler;
@@ -68,7 +66,6 @@ public class HomeScreen implements com.badlogic.gdx.Screen {
     PlayerData[] playerData;
     Event[] events;
     GameSettings gameSettings = new GameSettings();
-
 
     public HomeScreen() {
         super(ScreenID.HOME_SCREEN);
