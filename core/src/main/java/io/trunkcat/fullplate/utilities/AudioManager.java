@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2024-2025 Trunk Cat Studios
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package io.trunkcat.fullplate.utilities;
 
 import com.badlogic.gdx.Gdx;
@@ -11,125 +33,131 @@ import java.util.HashMap;
 import io.trunkcat.fullplate.settings.GameSettings;
 
 public class AudioManager {
-    private GameSettings gameSettings;
-    private static AudioManager instance;
-    private Music currentMusic;
-    private float musicVolume;
-    private float soundVolume;
-    private boolean isMusicMuted;
-    private boolean isSoundMuted;
-    private Preferences preferences;
-    private final HashMap<String, Sound> soundCache = new HashMap<>();
+	private final GameSettings gameSettings;
+	private static AudioManager instance;
+	private Music currentMusic;
+	private float musicVolume;
+	private float soundVolume;
+	private boolean isMusicMuted;
+	private boolean isSoundMuted;
+	private Preferences preferences;
+	private final HashMap<String, Sound> soundCache = new HashMap<>();
 
-    public AudioManager() {
-        gameSettings = GameSettings.getInstance();
-        preferences = Gdx.app.getPreferences("Full plate Preferences");
-        loadSoundSettings();
-    }
+	public AudioManager() {
+		gameSettings = GameSettings.getInstance();
+		preferences = Gdx.app.getPreferences("Full plate Preferences");
+		loadSoundSettings();
+	}
 
-    private void loadSoundSettings() {
-        musicVolume = preferences.getFloat("musicVolume", 1.0f);
-        soundVolume = preferences.getFloat("soundVolume", 1.0f);
-        isMusicMuted = preferences.getBoolean("muted", false);
-        isSoundMuted = preferences.getBoolean("muted", false);
-    }
+	private void loadSoundSettings() {
+		musicVolume = preferences.getFloat("musicVolume", 1.0f);
+		soundVolume = preferences.getFloat("soundVolume", 1.0f);
+		isMusicMuted = preferences.getBoolean("muted", false);
+		isSoundMuted = preferences.getBoolean("muted", false);
+	}
 
-    private void saveSoundSettings() {
-        gameSettings.saveSettings(musicVolume, soundVolume, isMusicMuted);
-        gameSettings.getPreferences().flush();
-    }
+	private void saveSoundSettings() {
+		gameSettings.saveSettings(musicVolume, soundVolume, isMusicMuted);
+		gameSettings.getPreferences().flush();
+	}
 
-    // Music Controls
-    public void playMusic(String filePath, boolean looping) {
-        stopMusic();
-        currentMusic = Gdx.audio.newMusic(Gdx.files.internal(filePath));
-        currentMusic.setLooping(looping);
-        currentMusic.setVolume(isMusicMuted ? 0f : musicVolume);
-        currentMusic.play();
-    }
+	// Music Controls
+	public void playMusic(String filePath, boolean looping) {
+		stopMusic();
+		currentMusic = Gdx.audio.newMusic(Gdx.files.internal(filePath));
+		currentMusic.setLooping(looping);
+		currentMusic.setVolume(isMusicMuted ? 0f : musicVolume);
+		currentMusic.play();
+	}
 
-    public void stopMusic() {
+	public void stopMusic() {
+		if (currentMusic != null) {
+			currentMusic.stop();
+			currentMusic.dispose();
+			currentMusic = null;
+		}
+	}
+
+	public void pauseMusic() {
         if (currentMusic != null) {
-            currentMusic.stop();
-            currentMusic.dispose();
-            currentMusic = null;
+            currentMusic.pause();
         }
-    }
+	}
 
-    public void pauseMusic() {
-        if (currentMusic != null) currentMusic.pause();
-    }
-
-    public void resumeMusic() {
-        if (currentMusic != null) currentMusic.play();
-    }
-
-    public void setMusicVolume(float volume) {
-        musicVolume = volume;
-        if (currentMusic != null && !isMusicMuted) {
-            currentMusic.setVolume(volume);
-        }
-        saveSoundSettings();
-    }
-
-    public void muteMusic(boolean mute) {
-        isMusicMuted = mute;
+	public void resumeMusic() {
         if (currentMusic != null) {
-            currentMusic.setVolume(mute ? 0f : musicVolume);
+            currentMusic.play();
         }
-        saveSoundSettings();
-    }
+	}
 
-    public boolean isMusicMuted() {
-        return isMusicMuted;
-    }
+	public void setMusicVolume(float volume) {
+		musicVolume = volume;
+		if (currentMusic != null && !isMusicMuted) {
+			currentMusic.setVolume(volume);
+		}
+		saveSoundSettings();
+	}
 
-    // SOUND METHODS
-    public void playSound(String filePath) {
-        if (!Gdx.files.internal(filePath).exists()) {
-            Gdx.app.error("AudioManager", "File not found: " + filePath);
+	public void muteMusic(boolean mute) {
+		isMusicMuted = mute;
+		if (currentMusic != null) {
+			currentMusic.setVolume(mute ? 0f : musicVolume);
+		}
+		saveSoundSettings();
+	}
+
+	public boolean isMusicMuted() {
+		return isMusicMuted;
+	}
+
+	// SOUND METHODS
+	public void playSound(String filePath) {
+		if (!Gdx.files.internal(filePath).exists()) {
+			Gdx.app.error("AudioManager", "File not found: " + filePath);
+			return;
+		}
+        if (isSoundMuted) {
             return;
         }
-        if (isSoundMuted) return;
 
-        Sound sound = soundCache.get(filePath);
-        if (sound == null) {
-            FileHandle fileHandle = Gdx.files.internal(filePath);
-            sound = Gdx.audio.newSound(fileHandle);
-            soundCache.put(filePath, sound);
-        }
+		Sound sound = soundCache.get(filePath);
+		if (sound == null) {
+			FileHandle fileHandle = Gdx.files.internal(filePath);
+			sound = Gdx.audio.newSound(fileHandle);
+			soundCache.put(filePath, sound);
+		}
 
-        sound.play(soundVolume);
-    }
+		sound.play(soundVolume);
+	}
 
-    public void setSoundVolume(float volume) {
-        soundVolume = volume;
-        saveSoundSettings();
-    }
+	public void setSoundVolume(float volume) {
+		soundVolume = volume;
+		saveSoundSettings();
+	}
 
-    public void muteSound(boolean mute) {
-        isSoundMuted = mute;
-        saveSoundSettings();
-    }
+	public void muteSound(boolean mute) {
+		isSoundMuted = mute;
+		saveSoundSettings();
+	}
 
-    public boolean isSoundMuted() {
-        return isSoundMuted;
-    }
+	public boolean isSoundMuted() {
+		return isSoundMuted;
+	}
 
-    public void dispose() {
-        stopMusic();
-        for (Sound sound : soundCache.values()) {
-            sound.dispose();
-        }
-        soundCache.clear();
-    }
+	public void dispose() {
+		stopMusic();
+		for (Sound sound : soundCache.values()) {
+			sound.dispose();
+		}
+		soundCache.clear();
+	}
 
-    public float getMusicVolume() {
-        return musicVolume;
-    }
+	public float getMusicVolume() {
+		return musicVolume;
+	}
 
-    public float getSoundVolume() {
-        return soundVolume;
-    }
+	public float getSoundVolume() {
+		return soundVolume;
+	}
 
 }

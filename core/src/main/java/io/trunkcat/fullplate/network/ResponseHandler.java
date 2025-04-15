@@ -22,8 +22,8 @@
 
 package io.trunkcat.fullplate.network;
 
-public interface ResponseHandler<T> {
-    void success(T response);
+public interface ResponseHandler<T extends Object> {
+	void success(T response);
 
-    void failure(String message);
+	void failure(String message);
 }

@@ -22,53 +22,65 @@
 
 package io.trunkcat.fullplate.screens;
 
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+
 import io.trunkcat.fullplate.CookGame;
 
 public abstract class BaseScreen implements com.badlogic.gdx.Screen {
-    protected final ScreenID screenID;
-    protected CookGame game;
+	protected final ScreenID screenID;
+	protected CookGame game;
 
-    public BaseScreen(ScreenID screenID) {
-        this.screenID = screenID;
-        game = CookGame.getInstance();
-    }
+	public BaseScreen(ScreenID screenID) {
+		this.screenID = screenID;
+		game = CookGame.getInstance();
+	}
 
-    public ScreenID getScreenID() {
-        return screenID;
-    }
+	public ScreenID getScreenID() {
+		return screenID;
+	}
 
-    @Override
-    public void show() {
+	@Override
+	public void show() {
 
-    }
+	}
 
-    @Override
-    public void render(float delta) {
+	@Override
+	public void render(float delta) {
 
-    }
+	}
 
-    @Override
-    public void resize(int width, int height) {
+	@Override
+	public void resize(int width, int height) {
 
-    }
+	}
 
-    @Override
-    public void pause() {
+	@Override
+	public void pause() {
 
-    }
+	}
 
-    @Override
-    public void resume() {
+	@Override
+	public void resume() {
 
-    }
+	}
 
-    @Override
-    public void hide() {
+	@Override
+	public void hide() {
 
-    }
+	}
 
-    @Override
-    public void dispose() {
+	@Override
+	public void dispose() {
 
-    }
+	}
+
+	public static void onChange(Actor actor, Runnable runnable) {
+		actor.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				runnable.run();
+			}
+		});
+	}
 }

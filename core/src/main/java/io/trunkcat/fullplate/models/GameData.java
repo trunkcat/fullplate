@@ -20,27 +20,23 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.entities;
+package io.trunkcat.fullplate.models;
 
-import io.trunkcat.fullplate.CookGame;
-import io.trunkcat.fullplate.models.PlayerData;
-import io.trunkcat.fullplate.screens.LoginScreen;
-import io.trunkcat.fullplate.utilities.Constants;
+import com.badlogic.gdx.utils.Array;
 
-public class Player {
-    private final CookGame game;
-    public PlayerData data;
+import io.trunkcat.fullplate.models.responses.Place;
 
-    public Player() {
-        game = CookGame.getInstance();
-        data = new PlayerData();
-    }
+public class GameData {
+	private Array<Place> places;
 
-    public void logout() {
-        game.httpClient.setAuthSessionToken(null);
-        data = null;
-        game.preferences.remove(Constants.PREF_KEY_SESSION_TOKEN);
-        game.preferences.flush();
-        game.setScreen(new LoginScreen());
-    }
+	public GameData() {
+	}
+
+	public void setPlaces(Array<Place> places) {
+		this.places = places;
+	}
+
+	public Array<Place> getPlaces() {
+		return places;
+	}
 }

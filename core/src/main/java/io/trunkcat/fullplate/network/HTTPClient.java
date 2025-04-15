@@ -25,6 +25,8 @@ package io.trunkcat.fullplate.network;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Net;
 import com.badlogic.gdx.net.HttpRequestBuilder;
+import com.badlogic.gdx.net.HttpStatus;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonWriter;
@@ -32,129 +34,207 @@ import com.badlogic.gdx.utils.JsonWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.trunkcat.fullplate.CookGame;
+
 public class HTTPClient {
-    final String basePath;
-    String authSessionToken = null;
-    final Json jsonParser;
+	private final String basePath;
+	private String authSessionToken = null;
+	private final Json jsonParser;
+	private final CookGame game;
 
-    public HTTPClient(String basePath) {
-        this.basePath = basePath;
+	public HTTPClient(String basePath) {
+		this.game = CookGame.getInstance();
+		this.basePath = basePath;
 
-        jsonParser = new Json();
-        jsonParser.setOutputType(JsonWriter.OutputType.json);
-        jsonParser.setTypeName(null);
-        jsonParser.setUsePrototypes(false);
-        //noinspection rawtypes
-        jsonParser.setSerializer(HashMap.class, new Json.Serializer<HashMap>() {
-            @Override
-            public void write(Json json, HashMap map, Class knownType) {
-                json.writeObjectStart();
-                for (Object entry : map.entrySet()) {
-                    Map.Entry<?, ?> mapEntry = (Map.Entry<?, ?>) entry;
-                    String key = mapEntry.getKey().toString();
-                    json.writeValue(key, mapEntry.getValue());
-                }
-                json.writeObjectEnd();
-            }
+		jsonParser = new Json();
+		jsonParser.setOutputType(JsonWriter.OutputType.json);
+		jsonParser.setTypeName(null);
+		jsonParser.setUsePrototypes(false);
+		//noinspection rawtypes
+		jsonParser.setSerializer(
+				HashMap.class, new Json.Serializer<HashMap>() {
+					@Override
+					public void write(Json json, HashMap map, Class knownType) {
+						json.writeObjectStart();
+						for (Object entry : map.entrySet()) {
+							Map.Entry<?, ?> mapEntry = (Map.Entry<?, ?>) entry;
+							String key = mapEntry.getKey().toString();
+							json.writeValue(key, mapEntry.getValue());
+						}
+						json.writeObjectEnd();
+					}
 
-            @Override
-            public HashMap<?, ?> read(Json json, JsonValue jsonData, Class type) {
-                return null; // read isn't required as we only send these data
-            }
-        });
-    }
+					@Override
+					public HashMap<?, ?> read(Json json, JsonValue jsonData, Class type) {
+						return null; // read isn't required as we only send these data
+					}
+				}
+		);
+	}
 
-    public boolean hasAuthSessionToken() {
-        return authSessionToken != null && !authSessionToken.isEmpty();
-    }
+	public boolean hasAuthSessionToken() {
+		return authSessionToken != null && !authSessionToken.isEmpty();
+	}
 
-    public void setAuthSessionToken(String token) {
-        this.authSessionToken = token;
-    }
+	public void setAuthSessionToken(String token) {
+		this.authSessionToken = token;
+	}
 
-    <T> void request(Net.HttpRequest httpRequest, ResponseHandler<T> responseHandler, Class<T> tClass) {
-        Net.HttpResponseListener httpResponseListener = new Net.HttpResponseListener() {
-            public void handleHttpResponse(Net.HttpResponse httpResponse) {
-                final String result = httpResponse.getResultAsString();
-                final ApiResponse<T> response;
-                try {
-                    response = ApiResponse.fromJson(result, tClass);
-                    Gdx.app.postRunnable(() -> {
-                        if (response.isOk()) {
-                            responseHandler.success(response.getData());
-                        } else {
-                            responseHandler.failure(response.getMessage());
-                            Gdx.app.log("HTTP", "Response was not ok: " + response.getMessage());
-                        }
-                    });
-                } catch (Exception e) {
-                    Gdx.app.error("HTTP", "Failed to parse response: " + e.getMessage());
-                    Gdx.app.postRunnable(() -> responseHandler.failure("Invalid response from server"));
-                }
-            }
+	<T> void request(Net.HttpRequest httpRequest, ResponseHandler<T> responseHandler,
+	                 Class<T> tClass) {
+		Net.HttpResponseListener httpResponseListener = new Net.HttpResponseListener() {
+			public void handleHttpResponse(Net.HttpResponse httpResponse) {
+				final String result = httpResponse.getResultAsString();
+				final ApiResponse<T> response;
+				try {
+					response = ApiResponse.fromJson(result, tClass);
+					Gdx.app.postRunnable(() -> {
+						if (response.isOk()) {
+							responseHandler.success(response.getData());
+						} else {
+							if (httpResponse.getStatus().getStatusCode()
+									== HttpStatus.SC_UNAUTHORIZED) {
+								game.session.logout();
+							} else {
+								responseHandler.failure(response.getMessage());
+								Gdx.app.log(
+										"HTTP", "Response was not ok: " + response.getMessage());
+							}
+						}
+					});
+				} catch (Exception e) {
+					Gdx.app.error("HTTP", "Failed to parse response: " + e.getMessage());
+					e.printStackTrace();
+					Gdx.app.postRunnable(
+							() -> responseHandler.failure("Invalid response from server"));
+				}
+			}
 
-            public void failed(Throwable t) {
-                responseHandler.failure("Failed to connect");
-                Gdx.app.error("HTTP", "Failed to connect: " + t.getMessage());
-            }
+			public void failed(Throwable t) {
+				responseHandler.failure("Failed to connect");
+				Gdx.app.error("HTTP", "Failed to connect: " + t.getMessage());
+			}
 
-            public void cancelled() {
-                Gdx.app.log("HTTP", "Request was cancelled");
-            }
-        };
+			public void cancelled() {
+				Gdx.app.log("HTTP", "Request was cancelled");
+			}
+		};
 
-        Gdx.net.sendHttpRequest(httpRequest, httpResponseListener);
-    }
+		Gdx.net.sendHttpRequest(httpRequest, httpResponseListener);
+	}
 
-    HttpRequestBuilder makeBaseRequest(String method, String path) {
-        HttpRequestBuilder request = new HttpRequestBuilder()
-            .newRequest()
-            .method(method)
-            .url(basePath + path)
-            .timeout(5000);
+	// todo: ugly implementation, fix this shit
+	<T> void request(Net.HttpRequest httpRequest, ResponseHandler<Array<T>> responseHandler,
+	                 Class<T> tClass, boolean isArray) {
+		Net.HttpResponseListener httpResponseListener = new Net.HttpResponseListener() {
+			public void handleHttpResponse(Net.HttpResponse httpResponse) {
+				final String result = httpResponse.getResultAsString();
+				final ApiResponse<Array<T>> response;
+				try {
+					response = ApiResponse.fromJson(result, tClass, true);
+					Gdx.app.postRunnable(() -> {
+						if (response.isOk()) {
+							responseHandler.success(response.getData());
+						} else {
+							responseHandler.failure(response.getMessage());
+							Gdx.app.log("HTTP", "Response was not ok: " + response.getMessage());
+						}
+					});
+				} catch (Exception e) {
+					for (StackTraceElement element : e.getStackTrace()) {
+						System.out.println(element.getClassName() + "." + element.getMethodName()
+								                   + "(" + element.getFileName() + ":"
+								                   + element.getLineNumber() + ")");
+					}
+					Gdx.app.error("HTTP", "Failed to parse response: " + e.getMessage());
+					Gdx.app.postRunnable(
+							() -> responseHandler.failure("Invalid response from server"));
+				}
+			}
 
-        if (authSessionToken != null && !authSessionToken.isEmpty()) {
-            request.header("Authorization", "Bearer " + authSessionToken);
-        }
+			public void failed(Throwable t) {
+				responseHandler.failure("Failed to connect");
+				Gdx.app.error("HTTP", "Failed to connect: " + t.getMessage());
+			}
 
-        return request;
-    }
+			public void cancelled() {
+				Gdx.app.log("HTTP", "Request was cancelled");
+			}
+		};
 
-    public void get(String path, ResponseHandler<?> responseHandler) {
-        HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.GET, path);
-        request(request.build(), responseHandler, null);
-    }
+		Gdx.net.sendHttpRequest(httpRequest, httpResponseListener);
+	}
+
+	HttpRequestBuilder makeBaseRequest(String method, String path) {
+		HttpRequestBuilder request = new HttpRequestBuilder()
+				.newRequest()
+				.method(method)
+				.url(basePath + path)
+				.timeout(5000);
+
+		if (authSessionToken != null && !authSessionToken.isEmpty()) {
+			request.header("Authorization", "Bearer " + authSessionToken);
+		}
+
+		return request;
+	}
+
+	public void get(String path, ResponseHandler<?> responseHandler) {
+		HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.GET, path);
+		request(request.build(), responseHandler, null);
+	}
+
+	public <T> void get(String path, ResponseHandler<T> responseHandler, Class<T> tClass) {
+		HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.GET, path);
+		request(request.build(), responseHandler, tClass);
+	}
+
+	public <T> void get(String path, ResponseHandler<Array<T>> responseHandler, Class<T> tClass,
+	                    boolean isArray) {
+		HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.GET, path);
+		request(request.build(), responseHandler, tClass, isArray);
+	}
 
 
-    public <T> void get(String path, ResponseHandler<T> responseHandler, Class<T> tClass) {
-        HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.GET, path);
-        request(request.build(), responseHandler, tClass);
-    }
+	public void post(String path, Object json, ResponseHandler<?> responseHandler) {
+		HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.POST, path);
+		Net.HttpRequest req = request.build();
+		req.setHeader("Content-Type", "application/json");
+		req.setContent(jsonParser.toJson(json));
+		request(req, responseHandler, null);
+	}
 
+	public <T> void post(String path, Object json, ResponseHandler<T> responseHandler,
+	                     Class<T> tClass) {
+		HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.POST, path);
+		Net.HttpRequest req = request.build();
+		req.setHeader("Content-Type", "application/json");
+		req.setContent(jsonParser.toJson(json));
+		request(req, responseHandler, tClass);
+	}
 
-    public void post(String path, Object json, ResponseHandler<?> responseHandler) {
-        HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.POST, path);
-        Net.HttpRequest req = request.build();
-        req.setHeader("Content-Type", "application/json");
-        req.setContent(jsonParser.toJson(json));
-        request(req, responseHandler, null);
-    }
+	public <T> void post(String path, Object json, ResponseHandler<Array<T>> responseHandler,
+	                     Class<T> tClass, boolean isArray) {
+		HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.POST, path);
+		Net.HttpRequest req = request.build();
+		req.setHeader("Content-Type", "application/json");
+		req.setContent(jsonParser.toJson(json));
+		request(req, responseHandler, tClass, isArray);
+	}
 
-    public <T> void post(String path, Object json, ResponseHandler<T> responseHandler, Class<T> tClass) {
-        HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.POST, path);
-        Net.HttpRequest req = request.build();
-        req.setHeader("Content-Type", "application/json");
-        req.setContent(jsonParser.toJson(json));
-        request(req, responseHandler, tClass);
-    }
+	public void delete(String path, ResponseHandler<?> responseHandler) {
+		HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.DELETE, path);
+		request(request.build(), responseHandler, null);
+	}
 
-    public void delete(String path, ResponseHandler<?> responseHandler) {
-        HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.DELETE, path);
-        request(request.build(), responseHandler, null);
-    }
+	public <T> void delete(String path, ResponseHandler<T> responseHandler, Class<T> tClass) {
+		HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.DELETE, path);
+		request(request.build(), responseHandler, tClass);
+	}
 
-    public <T> void delete(String path, ResponseHandler<T> responseHandler, Class<T> tClass) {
-        HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.DELETE, path);
-        request(request.build(), responseHandler, tClass);
-    }
+	public <T> void delete(String path, ResponseHandler<Array<T>> responseHandler,
+	                       Class<T> tClass, boolean isArray) {
+		HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.DELETE, path);
+		request(request.build(), responseHandler, tClass, isArray);
+	}
 }

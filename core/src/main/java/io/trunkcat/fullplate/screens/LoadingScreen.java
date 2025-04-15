@@ -27,41 +27,57 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Array;
 
-import io.trunkcat.fullplate.models.PlayerData;
+import io.trunkcat.fullplate.models.responses.Place;
+import io.trunkcat.fullplate.models.responses.PlayerData;
 import io.trunkcat.fullplate.network.ResponseHandler;
 import io.trunkcat.fullplate.screens.home.HomeScreen;
 
 public class LoadingScreen extends SimpleScreen {
-    public LoadingScreen() {
-        super(ScreenID.LOADING_SCREEN);
-    }
+	public LoadingScreen() {
+		super(ScreenID.LOADING_SCREEN);
+	}
 
-    @Override
-    public void show() {
-        super.show();
+	@Override
+	public void show() {
+		super.show();
 
-        Table table = new Table();
-        table.setFillParent(true);
-        stage.addActor(table);
+		Table table = new Table();
+		table.setFillParent(true);
+		stage.addActor(table);
 
-        BitmapFont font = game.PallyFont.getSafe(38);
-        Label.LabelStyle style = new Label.LabelStyle(font, Color.WHITE);
-        Label loadStatusLabel = new Label("Loading...", style);
+		BitmapFont font = game.PallyFont.getSafe(38);
+		Label.LabelStyle style = new Label.LabelStyle(font, Color.WHITE);
+		Label loadStatusLabel = new Label("Loading...", style);
 
-        table.add(loadStatusLabel);
+		table.add(loadStatusLabel);
 
-        game.httpClient.get("/player", new ResponseHandler<PlayerData>() {
-            public void success(PlayerData playerData) {
-                game.player.data = playerData;
-                Gdx.app.log("Load", "Logged in as " + game.player.data.getUsername());
-                game.setScreen(new HomeScreen());
-            }
+		game.httpClient.get(
+				"/player", new ResponseHandler<PlayerData>() {
+					public void success(PlayerData playerData) {
+						game.player = playerData;
+						Gdx.app.log("Load", "Logged in as " + game.player.getUsername());
 
-            public void failure(String message) {
-                loadStatusLabel.setText(message);
-                game.player.logout();
-            }
-        }, PlayerData.class);
-    }
+						game.httpClient.get(
+								"/data/places", new ResponseHandler<Array<Place>>() {
+									public void success(Array<Place> places) {
+										game.data.setPlaces(places);
+										game.setScreen(new HomeScreen());
+									}
+
+									public void failure(String message) {
+										loadStatusLabel.setText(message);
+									}
+								}, Place.class, true
+						);
+					}
+
+					public void failure(String message) {
+						loadStatusLabel.setText(message);
+//						game.player.logout();
+					}
+				}, PlayerData.class
+		);
+	}
 }

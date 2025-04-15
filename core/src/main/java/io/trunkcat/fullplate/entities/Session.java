@@ -20,36 +20,24 @@
  * SOFTWARE.
  */
 
-package io.trunkcat.fullplate.models;
+package io.trunkcat.fullplate.entities;
 
-import io.trunkcat.fullplate.models.responses.PlayerStats;
+import io.trunkcat.fullplate.CookGame;
+import io.trunkcat.fullplate.screens.LoginScreen;
+import io.trunkcat.fullplate.utilities.Constants;
 
-public class PlayerData {
-    private int id;
-    private String username;
-    private PlayerStats stats;
+public class Session {
+	private final CookGame game;
 
-    public PlayerData() {
+	public Session() {
+		game = CookGame.getInstance();
+	}
 
-    }
-
-    public PlayerData(int id, String username, PlayerStats stats) {
-        this.id = id;
-        this.username = username;
-        this.stats = stats;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public PlayerStats getStats() {
-        return stats;
-    }
-
-
+	public void logout() {
+		game.httpClient.setAuthSessionToken(null);
+		game.player = null;
+		game.preferences.remove(Constants.PREF_KEY_SESSION_TOKEN);
+		game.preferences.flush();
+		game.setScreen(new LoginScreen());
+	}
 }
