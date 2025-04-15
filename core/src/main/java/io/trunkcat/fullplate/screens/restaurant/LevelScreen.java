@@ -53,36 +53,38 @@ import io.trunkcat.fullplate.screens.ScreenID;
 
 // TODO: Extract hud and kitchen
 public class LevelScreen extends BaseScreen {
-    private final CustomStage hudStage;
-    private final CustomStage levelStage;
-    private final LevelData levelData;
-    private final LevelProgress levelProgress;
-    private final DebugStage debugStage;
+	private final CustomStage hudStage;
+	private final CustomStage levelStage;
+	private final LevelData levelData;
+	private final LevelProgress levelProgress;
+	private final DebugStage debugStage;
 
+	// HUD elements
+	private Label experiencePointsLabel;
+	private Label coinsLabel;
 
-    // HUD elements
-    private Label experiencePointsLabel;
-    private Label coinsLabel;
+	public LevelScreen() {
+		super(ScreenID.LEVEL_SCREEN);
 
-    public LevelScreen() {
-        super(ScreenID.LEVEL_SCREEN);
+		// Make level data passed on from the constructor parameters.
+		levelData = new LevelData(2, 1000);
 
-        // Make level data passed on from the constructor parameters.
-        levelData = new LevelData(2, 1000);
+		hudStage = new CustomStage("HUD Stage", new ScreenViewport());
 
-        hudStage = new CustomStage("HUD Stage", new ScreenViewport());
+		levelStage = new CustomStage("Restaurant Stage", new ScreenViewport());
+		Viewport viewport = levelStage.getViewport();
 
-        levelStage = new CustomStage("Restaurant Stage", new ScreenViewport());
-        Viewport viewport = levelStage.getViewport();
-
-        // TODO: make the background adaptive:
-        Image backgroundImage = new Image(new Texture(Gdx.files.internal("backgrounds/restaurants/burger-place.png")));
-        if (backgroundImage.getHeight() < viewport.getWorldHeight() || backgroundImage.getWidth() < viewport.getWorldWidth()) {
-            float aspectRatio = backgroundImage.getWidth() / backgroundImage.getHeight();
-            backgroundImage.setHeight(viewport.getWorldHeight());
-            backgroundImage.setWidth(viewport.getWorldHeight() * (aspectRatio));
-        }
-        backgroundImage.setPosition((viewport.getWorldWidth() - backgroundImage.getWidth()) / 2f, 0);
+		// TODO: make the background adaptive:
+		Image backgroundImage = new Image(
+				new Texture(Gdx.files.internal("backgrounds/restaurants/burger-place.png")));
+		if (backgroundImage.getHeight() < viewport.getWorldHeight()
+				|| backgroundImage.getWidth() < viewport.getWorldWidth()) {
+			float aspectRatio = backgroundImage.getWidth() / backgroundImage.getHeight();
+			backgroundImage.setHeight(viewport.getWorldHeight());
+			backgroundImage.setWidth(viewport.getWorldHeight() * (aspectRatio));
+		}
+		backgroundImage.setPosition(
+				(viewport.getWorldWidth() - backgroundImage.getWidth()) / 2f, 0);
 //        levelStage.addActor(backgroundImage);
 
 /*
@@ -94,186 +96,188 @@ public class LevelScreen extends BaseScreen {
         levelStage.addActor(tableImage);
 */
 
-        levelStage.setDebugAll(true);
+		levelStage.setDebugAll(true);
 
-        levelProgress = new LevelProgress();
-        levelStage.addListener(new LevelEventListener(levelData, levelProgress) {
-            @Override
-            public boolean handle(Event event) {
-                boolean handled = super.handle(event);
+		levelProgress = new LevelProgress();
+		levelStage.addListener(new LevelEventListener(levelData, levelProgress) {
+			@Override
+			public boolean handle(Event event) {
+				boolean handled = super.handle(event);
 
-                if (event instanceof LevelEvent) {
-                    if (event instanceof LevelEvent.LevelCompletedEvent) {
-                        Window window = createWindow();
+				if (event instanceof LevelEvent) {
+					if (event instanceof LevelEvent.LevelCompletedEvent) {
+						Window window = createWindow();
 
-                        Table content = new Table();
+						Table content = new Table();
 
-                        boolean won = levelProgress.getCoins() >= levelData.getCoinsGoal();
-                        String title = "LEVEL " + (won ? "WON" : "FAILED");
+						boolean won = levelProgress.getCoins() >= levelData.getCoinsGoal();
+						String title = "LEVEL " + (won ? "WON" : "FAILED");
 
-                        content.add(new Label(title, game.skin, "h1"));
+						content.add(new Label(title, game.skin, "h1"));
 
-                        setWindowContent(window, content);
-                        hudStage.addActor(window);
-                    }
-                }
+						setWindowContent(window, content);
+						hudStage.addActor(window);
+					}
+				}
 
-                return handled;
-            }
-        });
+				return handled;
+			}
+		});
 
-        debugStage = new DebugStage(levelStage, hudStage);
+		debugStage = new DebugStage(levelStage, hudStage);
 
-        setupHUD();
-        setupKitchen();
-    }
+		setupHUD();
+		setupKitchen();
+	}
 
-    @Override
-    public void show() {
-        Gdx.app.log("Stage", "Viewport world size: " + levelStage.getViewport().getWorldWidth() +
-            "x" + levelStage.getViewport().getWorldHeight() +
-            ", screen size: " + Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight());
+	@Override
+	public void show() {
+		Gdx.app.log(
+				"Stage", "Viewport world size: " + levelStage.getViewport().getWorldWidth() +
+						"x" + levelStage.getViewport().getWorldHeight() +
+						", screen size: " + Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight()
+		);
 
-        InputMultiplexer inputMultiplexer = new InputMultiplexer();
-        inputMultiplexer.addProcessor(debugStage);
-        inputMultiplexer.addProcessor(hudStage);
-        inputMultiplexer.addProcessor(levelStage);
-        Gdx.input.setInputProcessor(inputMultiplexer);
-    }
+		InputMultiplexer inputMultiplexer = new InputMultiplexer();
+		inputMultiplexer.addProcessor(debugStage);
+		inputMultiplexer.addProcessor(hudStage);
+		inputMultiplexer.addProcessor(levelStage);
+		Gdx.input.setInputProcessor(inputMultiplexer);
+	}
 
-    @Override
-    public void render(float delta) {
-        Gdx.gl.glClearColor(0f, 0f, 0f, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+	@Override
+	public void render(float delta) {
+		Gdx.gl.glClearColor(0f, 0f, 0f, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // TODO: Extract hud and kitchen
-        coinsLabel.setText(getCoinsText());
-        experiencePointsLabel.setText(getExperiencePointsText());
+		// TODO: Extract hud and kitchen
+		coinsLabel.setText(getCoinsText());
+		experiencePointsLabel.setText(getExperiencePointsText());
 
-        levelStage.act(delta);
-        levelStage.draw();
+		levelStage.act(delta);
+		levelStage.draw();
 
-        hudStage.act(delta);
-        hudStage.draw();
+		hudStage.act(delta);
+		hudStage.draw();
 
-        debugStage.act(delta);
-        debugStage.draw();
-    }
+		debugStage.act(delta);
+		debugStage.draw();
+	}
 
-    @Override
-    public void resize(int width, int height) {
-        hudStage
-            .getViewport()
-            .update(width, height, true);
-        levelStage
-            .getViewport()
-            .update(width, height, true);
-    }
+	@Override
+	public void resize(int width, int height) {
+		hudStage
+				.getViewport()
+				.update(width, height, true);
+		levelStage
+				.getViewport()
+				.update(width, height, true);
+	}
 
-    @Override
-    public void dispose() {
-        debugStage.dispose();
-        hudStage.dispose();
-        levelStage.dispose();
-    }
+	@Override
+	public void dispose() {
+		debugStage.dispose();
+		hudStage.dispose();
+		levelStage.dispose();
+	}
 
-    // FIXME: shouldn't be this. abstract or extract.
-    private String getCoinsText() {
-        int coinsCollected = levelProgress.getCoins() + levelProgress.getTip();
-        return coinsCollected + " / " + levelData.getCoinsGoal() + " coins";
-    }
+	// FIXME: shouldn't be this. abstract or extract.
+	private String getCoinsText() {
+		int coinsCollected = levelProgress.getCoins() + levelProgress.getTip();
+		return coinsCollected + " / " + levelData.getCoinsGoal() + " coins";
+	}
 
-    private String getExperiencePointsText() {
-        return levelProgress.getExperiencePoints() + " xp";
-    }
+	private String getExperiencePointsText() {
+		return levelProgress.getExperiencePoints() + " xp";
+	}
 
-    private void setupHUD() {
-        Table mainTable = new Table();
-        mainTable.setFillParent(true);
+	private void setupHUD() {
+		Table mainTable = new Table();
+		mainTable.setFillParent(true);
 
-        // TODO: make all these custom actors or make helper string builders
-        Table topBar = new Table();
-        Table centerElements = new Table();
+		// TODO: make all these custom actors or make helper string builders
+		Table topBar = new Table();
+		Table centerElements = new Table();
 
-        experiencePointsLabel = new Label(getExperiencePointsText(), game.skin, "h2");
-        centerElements.add(experiencePointsLabel).space(15).padRight(30);
-        coinsLabel = new Label(getCoinsText(), game.skin, "h2");
-        centerElements.add(coinsLabel).space(15);
+		experiencePointsLabel = new Label(getExperiencePointsText(), game.skin, "h2");
+		centerElements.add(experiencePointsLabel).space(15).padRight(30);
+		coinsLabel = new Label(getCoinsText(), game.skin, "h2");
+		centerElements.add(coinsLabel).space(15);
 
-        topBar.add(centerElements).expandX().center();
+		topBar.add(centerElements).expandX().center();
 
-        mainTable.top();
-        mainTable.add(topBar).fillX().expandX();
+		mainTable.top();
+		mainTable.add(topBar).fillX().expandX();
 
-        hudStage.addActor(mainTable);
-    }
+		hudStage.addActor(mainTable);
+	}
 
-    private Window createWindow() {
-        Window window = new Window("", game.skin);
-        window.setMovable(false);
-        window.setModal(true);
-        window.setKeepWithinStage(true);
-        window.setResizable(false);
-        return window;
-    }
+	private Window createWindow() {
+		Window window = new Window("", game.skin);
+		window.setMovable(false);
+		window.setModal(true);
+		window.setKeepWithinStage(true);
+		window.setResizable(false);
+		return window;
+	}
 
-    private void setWindowContent(Window window, Table content) {
-        Vector2 tableSize = calculateTableSize(content);
-        float windowWidth = tableSize.x + window.getStyle().background.getMinWidth() + 100;
-        float windowHeight = tableSize.y + window.getStyle().background.getMinHeight() + 100;
-        window.setSize(windowWidth, windowHeight);
-        window.setPosition(
-            Gdx.graphics.getWidth() / 2f - windowWidth / 2f,
-            Gdx.graphics.getHeight() / 2f - windowHeight / 2f
-        );
-        window.add(content).expand().fill();
-    }
+	private void setWindowContent(Window window, Table content) {
+		Vector2 tableSize = calculateTableSize(content);
+		float windowWidth = tableSize.x + window.getStyle().background.getMinWidth() + 100;
+		float windowHeight = tableSize.y + window.getStyle().background.getMinHeight() + 100;
+		window.setSize(windowWidth, windowHeight);
+		window.setPosition(
+				Gdx.graphics.getWidth() / 2f - windowWidth / 2f,
+				Gdx.graphics.getHeight() / 2f - windowHeight / 2f
+		);
+		window.add(content).expand().fill();
+	}
 
-    private Vector2 calculateTableSize(Table table) {
-        Vector2 size = new Vector2();
-        table.layout();
-        for (Cell<?> cell : new Array.ArrayIterable<>(table.getCells())) {
-            size.x += cell.getPrefWidth();
-            size.y += cell.getPrefHeight();
-        }
-        return size;
-    }
+	private Vector2 calculateTableSize(Table table) {
+		Vector2 size = new Vector2();
+		table.layout();
+		for (Cell<?> cell : new Array.ArrayIterable<>(table.getCells())) {
+			size.x += cell.getPrefWidth();
+			size.y += cell.getPrefHeight();
+		}
+		return size;
+	}
 
-    private void setupKitchen() {
-        BunCrate bunCrate = new BunCrate(1000);
-        addLevelEntity(bunCrate, 100, 100);
+	private void setupKitchen() {
+		BunCrate bunCrate = new BunCrate(1000);
+		addLevelEntity(bunCrate, 100, 100);
 
-        PattyCrate pattyCrate = new PattyCrate(1000);
-        addLevelEntity(pattyCrate, 300, 100);
+		PattyCrate pattyCrate = new PattyCrate(1000);
+		addLevelEntity(pattyCrate, 300, 100);
 
-        Pan pan = new Pan();
-        addLevelEntity(pan, 500, 100);
+		Pan pan = new Pan();
+		addLevelEntity(pan, 500, 100);
 
-        Plate plate = new Plate();
-        addLevelEntity(plate, 800, 100);
+		Plate plate = new Plate();
+		addLevelEntity(plate, 800, 100);
 
-        CustomerSystem customerSystem = new CustomerSystem(
-            RecipeCollection.from(Plate.RECIPE_COLLECTION),
-            levelData,
-            levelProgress
-        );
+		CustomerSystem customerSystem = new CustomerSystem(
+				RecipeCollection.from(Plate.RECIPE_COLLECTION),
+				levelData,
+				levelProgress
+		);
 
-        // todo: calculate this based on world width, customer actor width, and y pos.
-        customerSystem.addSeat(new Seat(100, 700));
-        customerSystem.addSeat(new Seat(500, 700));
-        customerSystem.addSeat(new Seat(900, 700));
-        customerSystem.addSeat(new Seat(1300, 700));
+		// todo: calculate this based on world width, customer actor width, and y pos.
+		customerSystem.addSeat(new Seat(100, 700));
+		customerSystem.addSeat(new Seat(500, 700));
+		customerSystem.addSeat(new Seat(900, 700));
+		customerSystem.addSeat(new Seat(1300, 700));
 
-        addLevelSystem(customerSystem);
-    }
+		addLevelSystem(customerSystem);
+	}
 
-    private void addLevelEntity(Actor item, int x, int y) {
-        item.setPosition(x, y);
-        levelStage.addActor(item);
-    }
+	private void addLevelEntity(Actor item, int x, int y) {
+		item.setPosition(x, y);
+		levelStage.addActor(item);
+	}
 
-    private void addLevelSystem(System system) {
-        system.setVisible(false);
-        levelStage.addActor(system);
-    }
+	private void addLevelSystem(System system) {
+		system.setVisible(false);
+		levelStage.addActor(system);
+	}
 }
