@@ -38,17 +38,20 @@ import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import io.trunkcat.fullplate.models.responses.Place;
 import io.trunkcat.fullplate.screens.BaseScreen;
 import io.trunkcat.fullplate.screens.ScreenID;
+import io.trunkcat.fullplate.settings.GameSettings;
 import io.trunkcat.fullplate.utilities.WidgetFactory;
 
 public class HomeScreen extends BaseScreen {
@@ -57,6 +60,7 @@ public class HomeScreen extends BaseScreen {
 	private final MapGestureListener mapGestureHandler;
 
 	private final Window exitConfirmationWindow;
+    private GameSettings gameSettings;
 
 	public HomeScreen() {
 		super(ScreenID.HOME_SCREEN);
@@ -271,99 +275,114 @@ public class HomeScreen extends BaseScreen {
 
 	// TODO: Complete settings window
 	private void showSettingsWindow() {
-		Window window = createWindow();
-		Table content = new Table();
-		content.defaults().pad(10).expandX();
+        Table content = new Table();
+        content.defaults().pad(10f).left();
 
-		//TODO: Load settings if player has a save (preferences)
+        Table audioControls = new Table();
+        audioControls.defaults().pad(5f).left();
 
-		Label heading = new Label("Settings", game.skin, "h1");
-		content.add(heading).expandX().left();
-		content.row();
+        Label audioLabel = new Label("Audio", game.skin, "h2");
 
-		Label audioLabel = new Label("Audio", game.skin, "h2");
-		content.add(audioLabel).left().padBottom(10);
-		content.row();
+        Label musicLabel = new Label("Music", game.skin);
+        Slider musicSlider = new Slider(0f, 1f, 0.01f, false, game.skin);
+        musicSlider.setValue(0.5f); // default value
 
-		Table audioControls = new Table();
-		audioControls.left();
-		showAudioControls(audioControls);
-		content.add(audioControls).left();
-		content.row();
+        Label sfxLabel = new Label("SFX", game.skin);
+        Slider sfxSlider = new Slider(0f, 1f, 0.01f, false, game.skin);
+        sfxSlider.setValue(0.5f); // default value
 
-		Label accountLabel = new Label("Account", game.skin, "h2");
-		Label accountInfo = new Label(
-				"Currently logged in as " + game.player.getUsername(), game.skin);
+        Button muteButton = new Button(game.skin, "volume-button");
 
-		TextButton logoutButton = new TextButton("Log Out", game.skin);
+        audioControls.add(audioLabel).align(Align.left);
+        audioControls.row();
+        audioControls.add(musicLabel).align(Align.left);
+        audioControls.add(musicSlider).width(200f).fillX();
+        audioControls.row();
+        audioControls.add(sfxLabel).align(Align.left);
+        audioControls.add(sfxSlider).width(200f).fillX();
+        audioControls.row();
+        audioControls.add(muteButton.align(Align.left)).size(64);
+        audioControls.row();
 
-		content.add(accountLabel).left();
-		content.row();
-		content.add(accountInfo).left();
-		content.row();
-		content.add(logoutButton).left();
-		content.row();
 
-		TextButton closeButton = new TextButton("Close", game.skin);
-		closeButton.addListener(new ChangeListener() {
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-				window.remove();
-			}
-		});
-		content.add(closeButton).pad(10);
+        content.add(audioControls).left();
+        content.row();
 
-		setWindowContent(window, content);
-		hudStage.addActor(window);
-	}
+        Table loggedControl = new Table();
+        loggedControl.defaults().pad(5f);
 
-	private void showAudioControls(Table audioControls) {
-		float musicVolume = game.preferences.getFloat("musicVolume");
-		float soundVolume = game.preferences.getFloat("soundVolume");
+        Label accountLabel = new Label("Account", game.skin, "h2");
+        Label accountInfo = new Label(
+            "Currently logged in as " + game.player.getUsername(), game.skin);
+        TextButton logoutButton = new TextButton("Log Out", game.skin);
 
-		Label musicLabel = new Label("MUSIC", game.skin);
-		Label soundLabel = new Label("SFX", game.skin);
+        loggedControl.add(accountLabel).align(Align.left);
+        loggedControl.row();
+        loggedControl.add(accountInfo).align(Align.left);
+        loggedControl.row();
+        loggedControl.add(logoutButton).align(Align.left);
+        loggedControl.row();
 
-		Slider musicSlider = new Slider(0.0f, 1.0f, 0.01f, false, game.skin);
-		musicSlider.setValue(game.audioManager.getMusicVolume());
-		musicSlider.setScale(2);
+        content.add(loggedControl).left();
+        content.row();
 
-		Slider soundSlider = new Slider(0.0f, 1.0f, 0.01f, false, game.skin);
-		soundSlider.setValue(game.audioManager.getSoundVolume());
-		soundSlider.setScale(2);
+        Table buttonTable = new Table();
+        buttonTable.defaults().pad(5f);
 
-		musicSlider.addListener(new ChangeListener() {
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-				float musicVolume = musicSlider.getValue();
-				game.audioManager.setMusicVolume(musicVolume);
-			}
-		});
+        TextButton saveButton = new TextButton("Cancel", game.skin);
+        TextButton closeButton = new TextButton("Save", game.skin);
 
-		soundSlider.addListener(new ChangeListener() {
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-				float soundVolume = soundSlider.getValue();
-				game.audioManager.setSoundVolume(soundVolume);
-			}
-		});
+        buttonTable.add(saveButton).width(100f);
+        buttonTable.add(closeButton).width(100f);
+        buttonTable.row();
 
-		Button muteButton = new Button(game.skin, "volume-button");
-		muteButton.addListener(new ChangeListener() {
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-				game.audioManager.muteMusic(!game.audioManager.isMusicMuted());
-				game.audioManager.muteSound(!game.audioManager.isSoundMuted());
-			}
-		});
+        content.add(buttonTable).padTop(20f).left();
+        content.row();
 
-		audioControls.add(musicLabel).expandX().padRight(50).width(70);
-		audioControls.add(musicSlider).expandX().width(150);
-		audioControls.row().left().pad(15);
-		audioControls.add(soundLabel).expandX().padRight(50).width(70);
-		audioControls.add(soundSlider).expandX().width(150).pad(15);
-		audioControls.row().left();
-		audioControls.add(muteButton).expandX().size(64).pad(15);
-		audioControls.row().left();
+        WidgetFactory.WindowProps props = new WidgetFactory.WindowProps();
+        props.setTitle("Settings");
+        props.setMinWidth(400f);
+        props.setPosition(hudStage.getWidth() / 2f, hudStage.getHeight() / 2f);
+
+        Window window = WidgetFactory.createWindow(
+            game.skin.get(Window.WindowStyle.class),
+            content,
+            props,
+            hudStage
+        );
+
+        musicSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                float musicVolume = musicSlider.getValue();
+                game.audioManager.setMusicVolume(musicVolume);
+            }
+        });
+
+        sfxSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                float sfxVolume = sfxSlider.getValue();
+                game.audioManager.setSoundVolume(sfxVolume);
+            }
+        });
+
+        muteButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                boolean muteNow = !game.audioManager.isMusicMuted();
+                game.audioManager.muteMusic(muteNow);
+                game.audioManager.muteSound(muteNow);
+//                muteButton.setChecked(muteNow);
+            }
+        });
+        closeButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                window.remove();
+            }
+        });
+
+        hudStage.addActor(window);
 	}
 }
