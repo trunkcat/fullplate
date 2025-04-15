@@ -110,6 +110,26 @@ com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
 		up: volume-on
 		checked: volume-off
 	}
+	close_button: {
+		up: close_icon
+		down: close_button_pressed
+	}
+	upgrade-button: {
+		up: upgrade_icon
+		down: upgrade_icon_pressed
+	}
+	info-button: {
+		up: info_icon
+		down: info_icon_pressed
+	}
+	storage-button: {
+		up: box_icon
+		down: box_icon_pressed
+	}
+	level-button: {
+		up: level_icon
+		down: level_icon_pressed
+	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	default: {
