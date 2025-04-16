@@ -62,7 +62,7 @@ public class CookGame extends Game {
 	public void create() {
 		viewport = new ScreenViewport();
 
-		httpClient = new HTTPClient("http://192.168.1.8:8080/api");
+		httpClient = new HTTPClient("http://192.168.29.36:8080/api");
 		preferences = Gdx.app.getPreferences("Full plate Preferences");
 
 		skin = new Skin(Gdx.files.internal("cook-skin/0.5/skin.json"));
