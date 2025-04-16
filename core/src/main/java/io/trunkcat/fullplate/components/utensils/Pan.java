@@ -34,40 +34,43 @@ import io.trunkcat.fullplate.components.kitchen.RecipeRenderer;
 import io.trunkcat.fullplate.utilities.Rect;
 
 public class Pan extends Cooker {
-    public static final RecipeCollection RECIPE_COLLECTION = new RecipeCollection();
+	public static final RecipeCollection RECIPE_COLLECTION = new RecipeCollection();
 
-    static {
-        RecipeRenderer renderer = new RecipeRenderer() {
-            @Override
-            public Rect render(HashMap<ID, PartialIngredient> ingredients, float worldX, float worldY) {
-                Rect rect = super.render(ingredients, worldX, worldY);
-                float x = 0, y = 0;
+	static {
+		RecipeRenderer renderer = new RecipeRenderer() {
+			@Override
+			public Rect render(HashMap<ID, PartialIngredient> ingredients,
+			                   float worldX,
+			                   float worldY) {
+				Rect rect = super.render(ingredients, worldX, worldY);
+				float x = 0, y = 0;
 
-                if (ingredients.containsKey(ID.PATTY)) {
-                    draw(rect, ingredients.get(ID.PATTY), x, y);
-                }
+				if (ingredients.containsKey(ID.PATTY)) {
+					draw(rect, ingredients.get(ID.PATTY), x, y);
+				}
 
-                return rect;
-            }
-        };
-        Recipe recipe = new Recipe(ID.PATTY, FoodState.UNCOOKED, renderer);
-        recipe.addIngredient(
-            new Ingredient(ID.PATTY, 1, FoodState.UNCOOKED)
-                .setCookingTime(5f)
-                .setOvercookingTime(5f)
-        );
+				return rect;
+			}
+		};
+		Recipe recipe = new Recipe(ID.PATTY, FoodState.UNCOOKED, renderer);
+		recipe.addIngredient(
+				      new Ingredient(ID.PATTY, 1, FoodState.UNCOOKED)
+						      .setCookingTime(5f)
+						      .setOvercookingTime(5f)
+		      ).setCookingPossible(true)
+		      .setOvercookingPossible(true);
 
-        RECIPE_COLLECTION.addRecipe(recipe);
-    }
+		RECIPE_COLLECTION.addRecipe(recipe);
+	}
 
-    public Pan() {
-        super(ID.PAN, 0, 1, RECIPE_COLLECTION);
-    }
+	public Pan() {
+		super(ID.PAN, 0, 1, RECIPE_COLLECTION);
+	}
 
-    @Override
-    public void act(float delta) {
-        super.act(delta);
+	@Override
+	public void act(float delta) {
+		super.act(delta);
 
-        setAssemblyOffset(75, 75);
-    }
+		setAssemblyOffset(75, 75);
+	}
 }

@@ -26,17 +26,21 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Event;
-import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import io.trunkcat.fullplate.components.common.System;
 import io.trunkcat.fullplate.components.debug.DebugStage;
@@ -47,36 +51,46 @@ import io.trunkcat.fullplate.components.utensils.BunCrate;
 import io.trunkcat.fullplate.components.utensils.Pan;
 import io.trunkcat.fullplate.components.utensils.PattyCrate;
 import io.trunkcat.fullplate.components.utensils.Plate;
+import io.trunkcat.fullplate.models.responses.Place;
+import io.trunkcat.fullplate.models.responses.PlayerData;
+import io.trunkcat.fullplate.network.ResponseHandler;
 import io.trunkcat.fullplate.screens.BaseScreen;
 import io.trunkcat.fullplate.screens.CustomStage;
 import io.trunkcat.fullplate.screens.ScreenID;
+import io.trunkcat.fullplate.screens.home.HomeScreen;
+import io.trunkcat.fullplate.utilities.WidgetFactory;
 
-// TODO: Extract hud and kitchen
+// todo: Extract hud and kitchen
 public class LevelScreen extends BaseScreen {
 	private final CustomStage hudStage;
 	private final CustomStage levelStage;
-	private final LevelData levelData;
+	private final Place.Level level;
+	private final Map<String, Place.Level.Goal> levelGoals;
 	private final LevelProgress levelProgress;
 	private final DebugStage debugStage;
 
-	// HUD elements
-	private Label experiencePointsLabel;
 	private Label coinsLabel;
 
-	public LevelScreen() {
+	public LevelScreen(Place.Level level) {
 		super(ScreenID.LEVEL_SCREEN);
-
-		// Make level data passed on from the constructor parameters.
-		levelData = new LevelData(2, 1000);
+		this.level = level;
+		this.levelGoals = level.getGoals()
+		                       .stream()
+		                       .collect(Collectors.toMap(
+				                       Place.Level.Goal::getGoalType,
+				                       goal -> goal
+		                       ));
+		if (!levelGoals.containsKey("coins")) {
+			throw new Error("Coins goal should exist for every level.");
+		}
 
 		hudStage = new CustomStage("HUD Stage", new ScreenViewport());
-
 		levelStage = new CustomStage("Restaurant Stage", new ScreenViewport());
 		Viewport viewport = levelStage.getViewport();
 
 		// TODO: make the background adaptive:
 		Image backgroundImage = new Image(
-				new Texture(Gdx.files.internal("backgrounds/restaurants/burger-place.png")));
+				new Texture(Gdx.files.internal("restaurants/burger-place/background.png")));
 		if (backgroundImage.getHeight() < viewport.getWorldHeight()
 				|| backgroundImage.getWidth() < viewport.getWorldWidth()) {
 			float aspectRatio = backgroundImage.getWidth() / backgroundImage.getHeight();
@@ -85,37 +99,133 @@ public class LevelScreen extends BaseScreen {
 		}
 		backgroundImage.setPosition(
 				(viewport.getWorldWidth() - backgroundImage.getWidth()) / 2f, 0);
-//        levelStage.addActor(backgroundImage);
-
-/*
-        Image tableImage = new Image(new Texture(Gdx.files.internal("restaurants/table.png")));
-        float tableImageAspectRatio = tableImage.getHeight() / tableImage.getWidth();
-        tableImage.setWidth(viewport.getWorldWidth());
-        tableImage.setHeight(viewport.getWorldWidth() * tableImageAspectRatio);
-        tableImage.addAction(Actions.alpha(0.1f));
-        levelStage.addActor(tableImage);
-*/
 
 		levelStage.setDebugAll(true);
 
 		levelProgress = new LevelProgress();
-		levelStage.addListener(new LevelEventListener(levelData, levelProgress) {
+		levelStage.addListener(new LevelEventListener(level, levelProgress) {
 			@Override
 			public boolean handle(Event event) {
 				boolean handled = super.handle(event);
 
 				if (event instanceof LevelEvent) {
 					if (event instanceof LevelEvent.LevelCompletedEvent) {
-						Window window = createWindow();
+						boolean won =
+								levelProgress.getCoins() >= levelGoals.get("coins").getGoalValue();
 
 						Table content = new Table();
 
-						boolean won = levelProgress.getCoins() >= levelData.getCoinsGoal();
-						String title = "LEVEL " + (won ? "WON" : "FAILED");
+						Table main = new Table();
+						content.add(main).fill().expand().grow().left();
+						content.row();
 
-						content.add(new Label(title, game.skin, "h1"));
+						main.defaults().expandX().fillX().left();
 
-						setWindowContent(window, content);
+						main.add(
+								new Label("Coins collected: " + levelProgress.getCoins(), game.skin)
+						).row();
+						main.add(
+								new Label("Tip collected: " + levelProgress.getTip(), game.skin)
+						).row();
+
+						Table footer = new Table();
+						footer.defaults().space(20f);
+						content.add(footer).padTop(20f).fill().expand().grow();
+
+						if (!won) {
+							TextButton homeButton = new TextButton("Go Home", game.skin);
+							footer.add(homeButton).fill().expand().grow();
+							onClick(
+									homeButton, () -> {
+										game.setScreen(new HomeScreen());
+									}
+							);
+
+							TextButton retryButton = new TextButton("Retry Level", game.skin);
+							footer.add(retryButton).fill().expand().grow();
+							onClick(
+									retryButton, () -> {
+										game.setScreen(new LevelScreen(level));
+									}
+							);
+						} else {
+							TextButton continueButton = new TextButton("Saving...", game.skin);
+							footer.add(continueButton).fill().expand().grow();
+							continueButton.setDisabled(true);
+
+							HashMap<String, Object> data = new HashMap<>();
+							data.put("placeId", level.getPlaceId());
+							data.put("levelId", level.getLevelId());
+							HashMap<Integer, Integer> goalProgress = new HashMap<>();
+							for (Place.Level.Goal levelGoal : level.getGoals()) {
+								goalProgress.put(
+										levelGoal.getGoalId(),
+										getObtainedGoalValue(levelGoal.getGoalType())
+								);
+							}
+							data.put("goals", goalProgress);
+
+							game.httpClient.put(
+									"/player/goal",
+									data,
+									new ResponseHandler<Array<PlayerData.GoalProgress>>() {
+										@Override
+										public void success(Array<PlayerData.GoalProgress> response) {
+											PlayerData.UnlockedPlace unlockedPlace = game.player
+													.getUnlockedPlace(level.getPlaceId());
+											PlayerData.CompletedLevel completedLevel = unlockedPlace.getCompletedLevel(
+													level.getLevelId());
+
+											ArrayList<PlayerData.GoalProgress> updatedGoalProgresses = new ArrayList<>();
+											for (PlayerData.GoalProgress progress : new Array.ArrayIterator<>(
+													response)) {
+												updatedGoalProgresses.add(progress);
+											}
+
+											if (completedLevel == null) {
+												PlayerData.CompletedLevel newlyCompletedLevel = new PlayerData.CompletedLevel();
+												newlyCompletedLevel
+														.setLevelId(level.getLevelId());
+												newlyCompletedLevel
+														.setGoalProgresses(updatedGoalProgresses);
+												unlockedPlace
+														.getCompletedLevels()
+														.add(newlyCompletedLevel);
+											} else {
+												completedLevel.setGoalProgresses(
+														updatedGoalProgresses);
+											}
+
+											continueButton.setText("Continue");
+											continueButton.setDisabled(false);
+										}
+
+										@Override
+										public void failure(String message) {
+											// todo: show a toast
+											Gdx.app.log("kek", message);
+										}
+									},
+									PlayerData.GoalProgress.class, true
+							);
+
+							onClick(
+									continueButton, () -> {
+										game.setScreen(new HomeScreen(level.getPlaceId()));
+									}
+							);
+						}
+
+						WidgetFactory.WindowProps props = new WidgetFactory.WindowProps();
+						props.setCloseButton(false);
+						props.setPosition(hudStage.getWidth() / 2f, hudStage.getHeight() / 2f);
+						props.setTitle("Level " + (won ? "won!" : "failed"));
+						props.setDescription(won ? "Congratulations!" : "Better luck next time!");
+						props.setMinWidth(hudStage.getWidth() / 4);
+
+						Window window = WidgetFactory.createWindow(
+								game.skin.get(Window.WindowStyle.class), content, props, hudStage
+						);
 						hudStage.addActor(window);
 					}
 				}
@@ -130,14 +240,23 @@ public class LevelScreen extends BaseScreen {
 		setupKitchen();
 	}
 
+	private int getObtainedGoalValue(String goalType) {
+		switch (goalType) {
+			case "coins":
+				return levelProgress.getCoins();
+			case "tip":
+				return levelProgress.getTip();
+			case "xp":
+				return levelProgress.getExperiencePoints();
+			case "customers":
+				return levelProgress.getCustomersServed();
+			default:
+				throw new IllegalArgumentException("Unknown goal type: " + goalType);
+		}
+	}
+
 	@Override
 	public void show() {
-		Gdx.app.log(
-				"Stage", "Viewport world size: " + levelStage.getViewport().getWorldWidth() +
-						"x" + levelStage.getViewport().getWorldHeight() +
-						", screen size: " + Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight()
-		);
-
 		InputMultiplexer inputMultiplexer = new InputMultiplexer();
 		inputMultiplexer.addProcessor(debugStage);
 		inputMultiplexer.addProcessor(hudStage);
@@ -152,7 +271,6 @@ public class LevelScreen extends BaseScreen {
 
 		// TODO: Extract hud and kitchen
 		coinsLabel.setText(getCoinsText());
-		experiencePointsLabel.setText(getExperiencePointsText());
 
 		levelStage.act(delta);
 		levelStage.draw();
@@ -172,6 +290,9 @@ public class LevelScreen extends BaseScreen {
 		levelStage
 				.getViewport()
 				.update(width, height, true);
+		debugStage
+				.getViewport()
+				.update(width, height, true);
 	}
 
 	@Override
@@ -181,26 +302,18 @@ public class LevelScreen extends BaseScreen {
 		levelStage.dispose();
 	}
 
-	// FIXME: shouldn't be this. abstract or extract.
 	private String getCoinsText() {
 		int coinsCollected = levelProgress.getCoins() + levelProgress.getTip();
-		return coinsCollected + " / " + levelData.getCoinsGoal() + " coins";
-	}
-
-	private String getExperiencePointsText() {
-		return levelProgress.getExperiencePoints() + " xp";
+		return coinsCollected + " coins";
 	}
 
 	private void setupHUD() {
 		Table mainTable = new Table();
 		mainTable.setFillParent(true);
 
-		// TODO: make all these custom actors or make helper string builders
 		Table topBar = new Table();
 		Table centerElements = new Table();
 
-		experiencePointsLabel = new Label(getExperiencePointsText(), game.skin, "h2");
-		centerElements.add(experiencePointsLabel).space(15).padRight(30);
 		coinsLabel = new Label(getCoinsText(), game.skin, "h2");
 		centerElements.add(coinsLabel).space(15);
 
@@ -210,37 +323,6 @@ public class LevelScreen extends BaseScreen {
 		mainTable.add(topBar).fillX().expandX();
 
 		hudStage.addActor(mainTable);
-	}
-
-	private Window createWindow() {
-		Window window = new Window("", game.skin);
-		window.setMovable(false);
-		window.setModal(true);
-		window.setKeepWithinStage(true);
-		window.setResizable(false);
-		return window;
-	}
-
-	private void setWindowContent(Window window, Table content) {
-		Vector2 tableSize = calculateTableSize(content);
-		float windowWidth = tableSize.x + window.getStyle().background.getMinWidth() + 100;
-		float windowHeight = tableSize.y + window.getStyle().background.getMinHeight() + 100;
-		window.setSize(windowWidth, windowHeight);
-		window.setPosition(
-				Gdx.graphics.getWidth() / 2f - windowWidth / 2f,
-				Gdx.graphics.getHeight() / 2f - windowHeight / 2f
-		);
-		window.add(content).expand().fill();
-	}
-
-	private Vector2 calculateTableSize(Table table) {
-		Vector2 size = new Vector2();
-		table.layout();
-		for (Cell<?> cell : new Array.ArrayIterable<>(table.getCells())) {
-			size.x += cell.getPrefWidth();
-			size.y += cell.getPrefHeight();
-		}
-		return size;
 	}
 
 	private void setupKitchen() {
@@ -258,7 +340,7 @@ public class LevelScreen extends BaseScreen {
 
 		CustomerSystem customerSystem = new CustomerSystem(
 				RecipeCollection.from(Plate.RECIPE_COLLECTION),
-				levelData,
+				levelGoals,
 				levelProgress
 		);
 

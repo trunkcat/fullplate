@@ -222,6 +222,32 @@ public class HTTPClient {
 		request(req, responseHandler, tClass, isArray);
 	}
 
+	public void put(String path, Object json, ResponseHandler<?> responseHandler) {
+		HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.PUT, path);
+		Net.HttpRequest req = request.build();
+		req.setHeader("Content-Type", "application/json");
+		req.setContent(jsonParser.toJson(json));
+		request(req, responseHandler, null);
+	}
+
+	public <T> void put(String path, Object json, ResponseHandler<T> responseHandler,
+	                    Class<T> tClass) {
+		HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.PUT, path);
+		Net.HttpRequest req = request.build();
+		req.setHeader("Content-Type", "application/json");
+		req.setContent(jsonParser.toJson(json));
+		request(req, responseHandler, tClass);
+	}
+
+	public <T> void put(String path, Object json, ResponseHandler<Array<T>> responseHandler,
+	                    Class<T> tClass, boolean isArray) {
+		HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.PUT, path);
+		Net.HttpRequest req = request.build();
+		req.setHeader("Content-Type", "application/json");
+		req.setContent(jsonParser.toJson(json));
+		request(req, responseHandler, tClass, isArray);
+	}
+
 	public void delete(String path, ResponseHandler<?> responseHandler) {
 		HttpRequestBuilder request = makeBaseRequest(Net.HttpMethods.DELETE, path);
 		request(request.build(), responseHandler, null);

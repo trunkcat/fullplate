@@ -29,42 +29,42 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
 public class SimpleScreen extends BaseScreen {
-    final protected Stage stage;
+	final protected Stage stage;
 
-    protected SimpleScreen(ScreenID screenID) {
-        super(screenID);
-        stage = new Stage(game.viewport);
-    }
+	protected SimpleScreen(ScreenID screenID) {
+		super(screenID);
+		stage = new Stage(game.viewport);
+	}
 
-    @Override
-    public void show() {
-        Gdx.input.setInputProcessor(stage);
-    }
+	@Override
+	public void show() {
+		Gdx.input.setInputProcessor(stage);
+	}
 
-    @Override
-    public void render(float delta) {
-        Gdx.gl.glClearColor(0f, 0f, 0f, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        stage.act(Math.min(delta, 1 / 30f));
-        stage.draw();
-    }
+	@Override
+	public void render(float delta) {
+		Gdx.gl.glClearColor(0f, 0f, 0f, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		stage.act(Math.min(delta, 1 / 30f));
+		stage.draw();
+	}
 
-    @Override
-    public void resize(int width, int height) {
-        game.viewport.update(width, height, true);
-    }
+	@Override
+	public void resize(int width, int height) {
+		game.viewport.update(width, height, true);
+	}
 
-    public static void onChange(Actor actor, Runnable runnable) {
-        actor.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                runnable.run();
-            }
-        });
-    }
+	public static void onChange(Actor actor, Runnable runnable) {
+		actor.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				runnable.run();
+			}
+		});
+	}
 
-    @Override
-    public void dispose() {
-        stage.dispose();
-    }
+	@Override
+	public void dispose() {
+		stage.dispose();
+	}
 }
