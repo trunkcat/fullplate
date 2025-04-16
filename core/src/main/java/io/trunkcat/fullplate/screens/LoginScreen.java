@@ -22,7 +22,9 @@
 
 package io.trunkcat.fullplate.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -30,6 +32,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
@@ -61,43 +65,55 @@ public class LoginScreen extends SimpleScreen {
 			return;
 		}
 
+        Texture bgTexture = new Texture(Gdx.files.internal("backgrounds/titlescreenbg.jpg"));
+        Drawable titlebg = new TextureRegionDrawable(new TextureRegion(bgTexture));
+
+        Table root = new Table();
+        root.setBackground(titlebg);
+        root.setFillParent(true);
+        stage.addActor(root);
+
+        Drawable bg = game.skin.getDrawable("window-rect");
 		Table table = new Table();
 		table.setDebug(false);
-		table.setFillParent(true);
-		stage.addActor(table);
+        table.setBackground(bg);
+        table.defaults().pad(20);
+
+        root.add(table);
 
 		final boolean[] register = {true};
 
 		BitmapFont font38 = game.PallyFont.getSafe(38);
-		Label.LabelStyle style = new Label.LabelStyle(font38, Color.WHITE);
-		Label title = new Label("", style);
+		Label title = new Label("", game.skin, "h1");
 
 		table.add(title).colspan(2).pad(10);
 		table.row();
 
 		BitmapFont font24 = game.PallyFont.getSafe(28);
-		Label.LabelStyle formLabelStyle = new Label.LabelStyle(font24, Color.WHITE);
 		TextField.TextFieldStyle formInputStyle = new TextField.TextFieldStyle(
-				font24, Color.WHITE, null, null,
+				font24, Color.BLACK,
+                new TextureRegionDrawable(
+                    new TextureRegion(AssetManager.colorTexture(Color.BLACK))
+                ), null,
 				new TextureRegionDrawable(
-						new TextureRegion(AssetManager.colorTexture(Color.DARK_GRAY)))
+						new TextureRegion(AssetManager.colorTexture(Color.valueOf("ded2a5"))))
 		);
 
-		Label emailLabel = new Label("Email", formLabelStyle);
+		Label emailLabel = new Label("Email", game.skin);
 		TextField emailText = new TextField("", formInputStyle);
 
 		table.add(emailLabel).pad(20).align(Align.right);
 		table.add(emailText).pad(20).align(Align.left).prefWidth(200);
 		table.row();
 
-		Label usernameLabel = new Label("Username", formLabelStyle);
+		Label usernameLabel = new Label("Username", game.skin);
 		TextField usernameText = new TextField("", formInputStyle);
 
 		table.add(usernameLabel).pad(20).align(Align.right);
 		table.add(usernameText).pad(20).align(Align.left).prefWidth(200);
 		table.row();
 
-		Label passwordLabel = new Label("Password", formLabelStyle);
+		Label passwordLabel = new Label("Password", game.skin);
 		TextField passwordText = new TextField("", formInputStyle);
 		passwordText.setPasswordMode(true);
 		passwordText.setPasswordCharacter('*');
