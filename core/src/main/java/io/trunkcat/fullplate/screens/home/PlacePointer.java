@@ -23,6 +23,7 @@
 package io.trunkcat.fullplate.screens.home;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
@@ -33,10 +34,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,6 +48,8 @@ import java.util.stream.Collectors;
 import io.trunkcat.fullplate.CookGame;
 import io.trunkcat.fullplate.models.responses.Place;
 import io.trunkcat.fullplate.models.responses.PlayerData;
+import io.trunkcat.fullplate.network.ResponseHandler;
+import io.trunkcat.fullplate.screens.restaurant.LevelScreen;
 import io.trunkcat.fullplate.utilities.WidgetFactory;
 
 class Tab {
@@ -74,6 +80,7 @@ public class PlacePointer extends Button {
 	private final CookGame game;
 	private final Place place;
 	private PlayerData.UnlockedPlace unlockedPlace;
+	private Window window;
 
 	public PlacePointer(Place place, Stage stage) {
 		this.game = CookGame.getInstance();
@@ -139,9 +146,109 @@ public class PlacePointer extends Button {
 					Table footer = new Table();
 					content.add(footer).padTop(20f).fill().expand().grow();
 
-					TextButton textButton = new TextButton(
+					TextButton buyButton = new TextButton(
 							"Buy for $" + place.getPrice(), game.skin);
-					footer.add(textButton).fill().expand().grow();
+
+					buyButton.addListener(new ClickListener() {
+						@Override
+						public void clicked(InputEvent event, float x, float y) {
+							super.clicked(event, x, y);
+
+							Table purchaseContent = new Table();
+							purchaseContent.defaults().expand().fill().grow().left().top();
+
+							Table footer = new Table();
+							footer.defaults().space(20f);
+
+							WidgetFactory.WindowProps props = new WidgetFactory.WindowProps();
+							props.setMaxWidth(stage.getWidth() / 4);
+							props.setPosition(stage.getWidth() / 2f, stage.getHeight() / 2f);
+
+							boolean hasLevel =
+									game.player.getStats().getPlayerLevel() >= place.getUnlocksAt();
+							boolean hasCoins =
+									game.player.getStats().getCoins() >= place.getPrice();
+
+							TextButton purchaseButton = new TextButton(
+									"Confirm purchase of $" + place.getPrice(), game.skin);
+							footer.add(purchaseButton).fill().expand().grow();
+
+							purchaseButton.addListener(new ClickListener() {
+								@Override
+								public void clicked(InputEvent event, float x, float y) {
+									super.clicked(event, x, y);
+
+									purchaseButton.setDisabled(true);
+									purchaseButton.setText("Purchase in progress");
+									HashMap<String, Object> data = new HashMap<>();
+									data.put("placeId", place.getPlaceId());
+
+									game.httpClient.post(
+											"/player/place", data, new ResponseHandler<Boolean>() {
+												@Override
+												public void success(Boolean response) {
+													PlayerData.UnlockedPlace newlyUnlockedPlace = new PlayerData.UnlockedPlace();
+													newlyUnlockedPlace.setPlaceId(
+															place.getPlaceId());
+													newlyUnlockedPlace.setCompletedLevels(
+															new ArrayList<>());
+													newlyUnlockedPlace.setUpgradedItems(
+															new ArrayList<>());
+													game.player.getUnlockedPlaces()
+													           .add(newlyUnlockedPlace);
+													purchaseContent.getParent()
+													               .getParent()
+													               .remove();
+													if (PlacePointer.this.window != null) {
+														PlacePointer.this.window.remove();
+													}
+												}
+
+												@Override
+												public void failure(String message) {
+													purchaseButton.setDisabled(false);
+													purchaseButton.setText("Confirm purchase of $"
+															                       + place.getPrice());
+												}
+											}, Boolean.class
+									);
+								}
+							});
+
+							if (hasLevel && hasCoins) {
+								props.setTitle("Are you sure?");
+								props.setDescription("Confirm your purchase.");
+
+							} else {
+								props.setTitle("You cannot purchase this");
+								Label reasonLabel = new Label("", game.skin);
+								if (!hasLevel) {
+									props.setDescription("Not enough experience.");
+									reasonLabel.setText(
+											"You don't have enough experience levels to make this purchase. Play levels and events to level up!"
+									);
+								} else if (!hasCoins) {
+									props.setDescription("Insufficient bank balance.");
+									reasonLabel.setText(
+											"You are short $" + (place.getPrice()
+													- game.player.getStats().getCoins())
+													+ " to purchase this place. Play levels and events to get coins. Upgrading your items can get you more money!");
+								}
+								reasonLabel.setWrap(true);
+								purchaseContent.add(reasonLabel).row();
+							}
+
+							purchaseContent.add(footer).padTop(20f).fill().expand().grow();
+
+							Window window = WidgetFactory.createWindow(
+									game.skin.get(Window.WindowStyle.class), purchaseContent, props,
+									stage
+							);
+							stage.addActor(window);
+						}
+					});
+
+					footer.add(buyButton).fill().expand().grow();
 				}
 
 				WidgetFactory.WindowProps props = new WidgetFactory.WindowProps();
@@ -150,7 +257,7 @@ public class PlacePointer extends Button {
 				props.setMinWidth(stage.getWidth() / 2f);
 				props.setPosition(stage.getWidth() / 2f, stage.getHeight() / 2f);
 
-				Window window = WidgetFactory.createWindow(
+				PlacePointer.this.window = WidgetFactory.createWindow(
 						game.skin.get(Window.WindowStyle.class), content, props, stage);
 				stage.addActor(window);
 			}
@@ -200,7 +307,7 @@ public class PlacePointer extends Button {
 				.stream()
 				.map(level -> levelIdToNo.getOrDefault(level.getLevelId(), 1))
 				.max(Comparator.naturalOrder())
-				.orElse(1);
+				.orElse(0) + 1;
 
 		switch (id) {
 			case "levels": {
@@ -225,6 +332,14 @@ public class PlacePointer extends Button {
 
 					if (level.getLevelNo() > nextPlayableLevel) {
 						playButton.setDisabled(true);
+					} else {
+						playButton.addListener(new ClickListener() {
+							@Override
+							public void clicked(InputEvent event, float x, float y) {
+								super.clicked(event, x, y);
+								game.setScreen(new LevelScreen(level));
+							}
+						});
 					}
 					levelsTable.add(playButton).expandX().fillX();
 					if (++i % MAX_LEVELS_PER_ROW == 0) {
@@ -331,11 +446,6 @@ public class PlacePointer extends Button {
 	}
 
 	private PlayerData.UnlockedPlace getUnlockedPlace() {
-		for (PlayerData.UnlockedPlace unlockedPlace : game.player.getUnlockedPlaces()) {
-			if (unlockedPlace.getPlaceId() == place.getPlaceId()) {
-				return unlockedPlace;
-			}
-		}
-		return null;
+		return game.player.getUnlockedPlace(place.getPlaceId());
 	}
 }

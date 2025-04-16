@@ -23,7 +23,9 @@
 package io.trunkcat.fullplate.screens;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 import io.trunkcat.fullplate.CookGame;
 
@@ -79,6 +81,17 @@ public abstract class BaseScreen implements com.badlogic.gdx.Screen {
 		actor.addListener(new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
+				runnable.run();
+			}
+		});
+	}
+
+
+	public static void onClick(Actor actor, Runnable runnable) {
+		actor.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				super.clicked(event, x, y);
 				runnable.run();
 			}
 		});

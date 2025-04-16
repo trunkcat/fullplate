@@ -27,31 +27,32 @@ import com.badlogic.gdx.scenes.scene2d.EventListener;
 
 import io.trunkcat.fullplate.components.kitchen.Customer;
 import io.trunkcat.fullplate.components.kitchen.CustomerEvent;
+import io.trunkcat.fullplate.models.responses.Place;
 
 public class LevelEventListener implements EventListener {
-    private final LevelData levelData;
-    private final LevelProgress levelProgress;
+	private final Place.Level levelData;
+	private final LevelProgress levelProgress;
 
-    LevelEventListener(LevelData levelData, LevelProgress levelProgress) {
-        this.levelData = levelData;
-        this.levelProgress = levelProgress;
-    }
+	LevelEventListener(Place.Level levelData, LevelProgress levelProgress) {
+		this.levelData = levelData;
+		this.levelProgress = levelProgress;
+	}
 
-    @Override
-    public boolean handle(Event event) {
-        if (event instanceof CustomerEvent) {
-            CustomerEvent customerEvent = (CustomerEvent) event;
-            Customer customer = customerEvent.getCustomer();
+	@Override
+	public boolean handle(Event event) {
+		if (event instanceof CustomerEvent) {
+			CustomerEvent customerEvent = (CustomerEvent) event;
+			Customer customer = customerEvent.getCustomer();
 
-            if (event instanceof CustomerEvent.CustomerPositionChangeEvent) {
-                CustomerEvent.CustomerPositionChangeEvent e = (CustomerEvent.CustomerPositionChangeEvent) event;
-                if (e.getCurrentState() == Customer.PositionState.LEFT) {
-                    levelProgress.setCoins(levelProgress.getCoins() + customer.getCoins());
-                    levelProgress.setTip(levelProgress.getTip() + customer.getTip());
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+			if (event instanceof CustomerEvent.CustomerPositionChangeEvent) {
+				CustomerEvent.CustomerPositionChangeEvent e = (CustomerEvent.CustomerPositionChangeEvent) event;
+				if (e.getCurrentState() == Customer.PositionState.LEFT) {
+					levelProgress.setCoins(levelProgress.getCoins() + customer.getCoins());
+					levelProgress.setTip(levelProgress.getTip() + customer.getTip());
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }

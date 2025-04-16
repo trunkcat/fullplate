@@ -55,6 +55,15 @@ public class PlayerData {
 		return unlockedPlaces;
 	}
 
+	public UnlockedPlace getUnlockedPlace(int placeId) {
+		for (UnlockedPlace place : unlockedPlaces) {
+			if (placeId == place.getPlaceId()) {
+				return place;
+			}
+		}
+		return null;
+	}
+
 	public static class Stats {
 		private int playerLevel;
 		private int coins;
@@ -88,12 +97,33 @@ public class PlayerData {
 			return placeId;
 		}
 
+		public void setPlaceId(int placeId) {
+			this.placeId = placeId;
+		}
+
 		public Collection<CompletedLevel> getCompletedLevels() {
 			return completedLevels;
 		}
 
+		public void setCompletedLevels(Collection<CompletedLevel> completedLevels) {
+			this.completedLevels = completedLevels;
+		}
+
+		public CompletedLevel getCompletedLevel(int levelId) {
+			for (CompletedLevel level : completedLevels) {
+				if (placeId == level.getLevelId()) {
+					return level;
+				}
+			}
+			return null;
+		}
+
 		public Collection<UpgradedItem> getUpgradedItems() {
 			return upgradedItems;
+		}
+
+		public void setUpgradedItems(Collection<UpgradedItem> upgradedItems) {
+			this.upgradedItems = upgradedItems;
 		}
 	}
 
@@ -108,8 +138,16 @@ public class PlayerData {
 			return levelId;
 		}
 
+		public void setLevelId(int levelId) {
+			this.levelId = levelId;
+		}
+
 		public Collection<GoalProgress> getGoalProgresses() {
 			return goalProgresses;
+		}
+
+		public void setGoalProgresses(Collection<GoalProgress> goalProgresses) {
+			this.goalProgresses = goalProgresses;
 		}
 	}
 

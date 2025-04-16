@@ -62,8 +62,16 @@ public class HomeScreen extends BaseScreen {
 	private final Window exitConfirmationWindow;
     private GameSettings gameSettings;
 
+	private final int focusPlaceId;
+
 	public HomeScreen() {
+		this(0);
+	}
+
+	public HomeScreen(int focusPlaceId) {
 		super(ScreenID.HOME_SCREEN);
+
+		this.focusPlaceId = focusPlaceId;
 
 		hudStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 		setupHUD();
@@ -83,9 +91,9 @@ public class HomeScreen extends BaseScreen {
 			mapImage.setHeight(mapViewport.getWorldHeight() * aspectRatio);
 			mapImage.setWidth(mapViewport.getWorldWidth() * aspectRatio);
 		}
-		mapCamera.position.set(
-				mapViewport.getWorldWidth() / 2f, mapViewport.getWorldHeight() / 2f, 0f
-		);
+//		mapCamera.position.set(
+//				mapViewport.getWorldWidth() / 2f, mapViewport.getWorldHeight() / 2f, 0f
+//		);
 
 		mapStage.addActor(mapImage);
 		mapGestureHandler = new MapGestureListener(
@@ -238,6 +246,9 @@ public class HomeScreen extends BaseScreen {
 		for (Place placeData : new Array.ArrayIterator<>(places)) {
 			PlacePointer pointer = new PlacePointer(placeData, hudStage);
 			placesGroup.addActor(pointer);
+			if (focusPlaceId == placeData.getPlaceId()) {
+				pointer.fire(new ChangeListener.ChangeEvent());
+			}
 		}
 		mapStage.addActor(placesGroup);
 	}

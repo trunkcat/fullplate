@@ -77,11 +77,16 @@ public class Place {
 	}
 
 	public static class Level {
+		private int placeId;
 		private int levelId;
 		private int levelNo;
 		private Collection<Goal> goals;
 
 		public Level() {
+		}
+
+		public int getPlaceId() {
+			return placeId;
 		}
 
 		public int getLevelId() {
@@ -92,7 +97,12 @@ public class Place {
 			return levelNo;
 		}
 
+		public Collection<Goal> getGoals() {
+			return goals;
+		}
+
 		public static class Goal {
+			private int levelId;
 			private int goalId;
 			private String goalType;
 			private int goalValue;
@@ -100,10 +110,13 @@ public class Place {
 			public Goal() {
 			}
 
+			public int getLevelId() {
+				return levelId;
+			}
+
 			public int getGoalId() {
 				return goalId;
 			}
-
 
 			public String getGoalType() {
 				return goalType;
@@ -116,12 +129,17 @@ public class Place {
 	}
 
 	public static class Item {
+		private int placeId;
 		private int itemId;
 		private String gameItem;
 		private int maxLevel;
 		private int unlocksIn;
 
 		public Item() {
+		}
+
+		public int getPlaceId() {
+			return placeId;
 		}
 
 		public int getItemId() {
