@@ -30,12 +30,12 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.input.GestureDetector;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -48,7 +48,9 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import io.trunkcat.fullplate.models.responses.LeaderboardEntry;
 import io.trunkcat.fullplate.models.responses.Place;
+import io.trunkcat.fullplate.network.ResponseHandler;
 import io.trunkcat.fullplate.screens.BaseScreen;
 import io.trunkcat.fullplate.screens.ScreenID;
 import io.trunkcat.fullplate.settings.GameSettings;
@@ -60,7 +62,7 @@ public class HomeScreen extends BaseScreen {
 	private final MapGestureListener mapGestureHandler;
 
 	private final Window exitConfirmationWindow;
-    private GameSettings gameSettings;
+	private GameSettings gameSettings;
 
 	private final int focusPlaceId;
 
@@ -198,6 +200,14 @@ public class HomeScreen extends BaseScreen {
 		Label coinsLabel = new Label(game.player.getStats().getCoins() + " coins", game.skin);
 		centerElements.add(coinsLabel).space(15);
 
+		Button leaderboardButton = new Button(game.skin, "leaderboard-button");
+		rightElements.add(leaderboardButton).size(64, 64).right().padRight(15).pad(5);
+		leaderboardButton.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				showLeaderboardWindow();
+			}
+		});
 		Button settingsButton = new Button(game.skin, "settings-button");
 		settingsButton.addListener(new ChangeListener() {
 			@Override
@@ -253,147 +263,170 @@ public class HomeScreen extends BaseScreen {
 		mapStage.addActor(placesGroup);
 	}
 
-	private Window createWindow() {
-		Window window = new Window("", game.skin);
-		window.setMovable(false);
-		window.setModal(true);
-		window.setKeepWithinStage(true);
-		window.setResizable(false);
-		return window;
-	}
+	private void showLeaderboardWindow() {
+		Table content = new Table();
+		content.defaults().left();
 
-	private void setWindowContent(Window window, Table content) {
-		Vector2 tableSize = calculateTableSize(content);
-		float windowWidth = tableSize.x + window.getStyle().background.getMinWidth() + 100;
-		float windowHeight = tableSize.y + window.getStyle().background.getMinHeight() + 100;
-		window.setSize(windowWidth, windowHeight);
-		window.setPosition(
-				Gdx.graphics.getWidth() / 2f - windowWidth / 2f,
-				Gdx.graphics.getHeight() / 2f - windowHeight / 2f
+		Table statusTable = new Table();
+		Label statusLabel = new Label("Loading...", game.skin);
+		statusTable.add(statusLabel);
+
+		Container<Table> container = new Container<>(statusTable);
+		container.pad(20f);
+		container.fillX();
+		container.top();
+		container.left();
+		ScrollPane scrollPane = new ScrollPane(container, game.skin);
+		scrollPane.setFadeScrollBars(false);
+		content.add(scrollPane).fill().grow().expand();
+		content.row();
+
+		WidgetFactory.WindowProps props = new WidgetFactory.WindowProps();
+		props.setTitle("Leaderboard");
+		props.setDescription("This leaderboard lists the top players!");
+		props.setMinWidth(hudStage.getWidth() / 2f);
+		props.setMinHeight(hudStage.getHeight() / 2f);
+		props.setPosition(hudStage.getWidth() / 2f, hudStage.getHeight() / 2f);
+
+		Window window = WidgetFactory.createWindow(
+				game.skin.get(Window.WindowStyle.class),
+				content,
+				props,
+				hudStage
 		);
-		window.add(content).expand().fill();
+
+		hudStage.addActor(window);
+
+		game.httpClient.get(
+				"/player/leaderboard", new ResponseHandler<Array<LeaderboardEntry>>() {
+					@Override
+					public void success(Array<LeaderboardEntry> response) {
+						Table leaderboard = new Table();
+						leaderboard.defaults().expandX().fillX().left().space(5f);
+
+						leaderboard.add(
+								new Label("Rank", game.skin, "h2"),
+								new Label("Username", game.skin, "h2"),
+								new Label("Level", game.skin, "h2"),
+								new Label("XP", game.skin, "h2")
+						).row();
+
+						for (int i = 0; i < response.size; i++) {
+							LeaderboardEntry entry = response.get(i);
+							String styleName = entry.getPlayerId().equals(game.player.getPlayerId())
+							                   ? "h2"
+							                   : "default";
+							leaderboard.add(
+									new Label("" + (i + 1), game.skin, styleName),
+									new Label(entry.getUsername(), game.skin, styleName),
+									new Label(entry.getPlayerLevel() + "", game.skin, styleName),
+									new Label(
+											entry.getExperiencePoints() + "", game.skin, styleName)
+							).row();
+						}
+
+						container.setActor(leaderboard);
+					}
+
+					@Override
+					public void failure(String message) {
+						statusLabel.setText("Something went wrong!");
+					}
+				}, LeaderboardEntry.class, true
+		);
 	}
 
-	private Vector2 calculateTableSize(Table table) {
-		Vector2 size = new Vector2();
-		table.pack();
-		for (Cell<?> cell : new Array.ArrayIterator<>(table.getCells())) {
-			size.x += cell.getPrefWidth();
-			size.y += cell.getPrefHeight();
-		}
-		return size;
-	}
-
-	// TODO: Complete settings window
 	private void showSettingsWindow() {
-        Table content = new Table();
-        content.defaults().pad(10f).left();
+		Table content = new Table();
+		content.defaults().pad(10f).left();
 
-        Table audioControls = new Table();
-        audioControls.defaults().pad(5f).left();
+		Table audioControls = new Table();
+		audioControls.defaults().pad(5f).left();
 
-        Label audioLabel = new Label("Audio", game.skin, "h2");
+		Label audioLabel = new Label("Audio", game.skin, "h2");
 
-        Label musicLabel = new Label("Music", game.skin);
-        Slider musicSlider = new Slider(0f, 1f, 0.01f, false, game.skin);
-        musicSlider.setValue(0.5f); // default value
+		Label musicLabel = new Label("Music", game.skin);
+		Slider musicSlider = new Slider(0f, 1f, 0.01f, false, game.skin);
+		musicSlider.setValue(0.5f); // default value
 
-        Label sfxLabel = new Label("SFX", game.skin);
-        Slider sfxSlider = new Slider(0f, 1f, 0.01f, false, game.skin);
-        sfxSlider.setValue(0.5f); // default value
+		Label sfxLabel = new Label("SFX", game.skin);
+		Slider sfxSlider = new Slider(0f, 1f, 0.01f, false, game.skin);
+		sfxSlider.setValue(0.5f); // default value
 
-        Button muteButton = new Button(game.skin, "volume-button");
+		Button muteButton = new Button(game.skin, "volume-button");
 
-        audioControls.add(audioLabel).align(Align.left);
-        audioControls.row();
-        audioControls.add(musicLabel).align(Align.left);
-        audioControls.add(musicSlider).width(200f).fillX();
-        audioControls.row();
-        audioControls.add(sfxLabel).align(Align.left);
-        audioControls.add(sfxSlider).width(200f).fillX();
-        audioControls.row();
-        audioControls.add(muteButton.align(Align.left)).size(64);
-        audioControls.row();
+		audioControls.add(audioLabel).align(Align.left);
+		audioControls.row();
+		audioControls.add(musicLabel).align(Align.left);
+		audioControls.add(musicSlider).width(200f).fillX();
+		audioControls.row();
+		audioControls.add(sfxLabel).align(Align.left);
+		audioControls.add(sfxSlider).width(200f).fillX();
+		audioControls.row();
+		audioControls.add(muteButton.align(Align.left)).size(64);
+		audioControls.row();
 
+		content.add(audioControls).left();
+		content.row();
 
-        content.add(audioControls).left();
-        content.row();
+		Table loggedControl = new Table();
+		loggedControl.defaults().pad(5f);
 
-        Table loggedControl = new Table();
-        loggedControl.defaults().pad(5f);
+		Label accountLabel = new Label("Account", game.skin, "h2");
+		Label accountInfo = new Label(
+				"Currently logged in as " + game.player.getUsername(), game.skin);
+		TextButton logoutButton = new TextButton("Log Out", game.skin);
 
-        Label accountLabel = new Label("Account", game.skin, "h2");
-        Label accountInfo = new Label(
-            "Currently logged in as " + game.player.getUsername(), game.skin);
-        TextButton logoutButton = new TextButton("Log Out", game.skin);
+		loggedControl.add(accountLabel).align(Align.left);
+		loggedControl.row();
+		loggedControl.add(accountInfo).align(Align.left);
+		loggedControl.row();
+		loggedControl.add(logoutButton).align(Align.left);
+		loggedControl.row();
 
-        loggedControl.add(accountLabel).align(Align.left);
-        loggedControl.row();
-        loggedControl.add(accountInfo).align(Align.left);
-        loggedControl.row();
-        loggedControl.add(logoutButton).align(Align.left);
-        loggedControl.row();
+		content.add(loggedControl).left();
+		content.row();
 
-        content.add(loggedControl).left();
-        content.row();
+		content.row();
 
-        Table buttonTable = new Table();
-        buttonTable.defaults().pad(5f);
+		WidgetFactory.WindowProps props = new WidgetFactory.WindowProps();
+		props.setTitle("Settings");
+		props.setMinWidth(400f);
+		props.setPosition(hudStage.getWidth() / 2f, hudStage.getHeight() / 2f);
 
-        TextButton saveButton = new TextButton("Cancel", game.skin);
-        TextButton closeButton = new TextButton("Save", game.skin);
+		Window window = WidgetFactory.createWindow(
+				game.skin.get(Window.WindowStyle.class),
+				content,
+				props,
+				hudStage
+		);
 
-        buttonTable.add(saveButton).width(100f);
-        buttonTable.add(closeButton).width(100f);
-        buttonTable.row();
+		musicSlider.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				float musicVolume = musicSlider.getValue();
+				game.audioManager.setMusicVolume(musicVolume);
+			}
+		});
 
-        content.add(buttonTable).padTop(20f).left();
-        content.row();
+		sfxSlider.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				float sfxVolume = sfxSlider.getValue();
+				game.audioManager.setSoundVolume(sfxVolume);
+			}
+		});
 
-        WidgetFactory.WindowProps props = new WidgetFactory.WindowProps();
-        props.setTitle("Settings");
-        props.setMinWidth(400f);
-        props.setPosition(hudStage.getWidth() / 2f, hudStage.getHeight() / 2f);
-
-        Window window = WidgetFactory.createWindow(
-            game.skin.get(Window.WindowStyle.class),
-            content,
-            props,
-            hudStage
-        );
-
-        musicSlider.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                float musicVolume = musicSlider.getValue();
-                game.audioManager.setMusicVolume(musicVolume);
-            }
-        });
-
-        sfxSlider.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                float sfxVolume = sfxSlider.getValue();
-                game.audioManager.setSoundVolume(sfxVolume);
-            }
-        });
-
-        muteButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                boolean muteNow = !game.audioManager.isMusicMuted();
-                game.audioManager.muteMusic(muteNow);
-                game.audioManager.muteSound(muteNow);
+		muteButton.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				boolean muteNow = !game.audioManager.isMusicMuted();
+				game.audioManager.muteMusic(muteNow);
+				game.audioManager.muteSound(muteNow);
 //                muteButton.setChecked(muteNow);
-            }
-        });
-        closeButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                window.remove();
-            }
-        });
+			}
+		});
 
-        hudStage.addActor(window);
+		hudStage.addActor(window);
 	}
 }
